@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Visualizador de Arquivo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        button {
+            background-color: #3498db;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 40px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #e9ecef;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .voltar {
+            background-color: #95a5a6;
+        }
+        .voltar:hover {
+            background-color: #7f8c8d;
+        }
+    </style>
+    <script>
+        function mostrarConteudo(conteudo) {
+            document.getElementById("resultado").innerHTML =
+                "<h3>Conteúdo do arquivo:</h3><pre>" + conteudo + "</pre>";
+        }
+
+        function voltarParaLista() {
+            window.location.href = 'lista.html';
+        }
+    </script>
+</head>
+<body>
+<h2>Visualizador de Arquivo</h2>
+<button class="voltar" onclick="voltarParaLista()">← Voltar para Lista</button>
+<div id="resultado">
+    <p>Aguardando conteúdo do arquivo...</p>
+</div>
+</body>
+</html>
