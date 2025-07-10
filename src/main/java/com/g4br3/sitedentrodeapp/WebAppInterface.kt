@@ -2,11 +2,13 @@ package com.g4br3.sitedentrodeapp
 
 import android.content.Context
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
-
+import android.webkit.WebViewClient
 /**
  * Interface entre o JavaScript da WebView e o código nativo Android.
  * Permite executar funções Kotlin diretamente do JavaScript.
@@ -18,10 +20,34 @@ import androidx.documentfile.provider.DocumentFile
 class WebAppInterface(
     private val context: Context,
     private val webView: WebView,
+    private val listarArquivos: () -> Unit,
     private val abrirPastaCallback: () -> Unit
 ) {
     /** URI da pasta selecionada, atualizada pela MainActivity */
     var selectedFolderUri: Uri? = null
+    var viewPageLoaded = false
+
+    fun currentSite(name: String = "list", onLoaded: (() -> Unit)? = null) {
+        viewPageLoaded = false
+        webView.post {
+            webView.loadUrl("file:///android_asset/$name.html")
+            webView.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    if (url?.contains("$name.html") == true) {
+                        viewPageLoaded = true
+                        onLoaded?.invoke()
+                    }
+                }
+            }
+        }
+    }
+
+    @JavascriptInterface
+    fun voltarParaLista() {
+        currentSite("list"){
+            listarArquivos()
+        }
+    }
 
     /** Função chamada do JavaScript para solicitar um nome. */
     @JavascriptInterface
@@ -42,6 +68,8 @@ class WebAppInterface(
     /** Função chamada do JavaScript para ler o conteúdo de um arquivo da pasta. */
     @JavascriptInterface
     fun lerArquivo(caminhoRelativo: String) {
+        currentSite("view")
+
         selectedFolderUri?.let { baseUri ->
             val arquivo = localizarArquivoPorCaminho(baseUri, caminhoRelativo)
             if (arquivo != null && arquivo.isFile) {
@@ -55,7 +83,14 @@ class WebAppInterface(
                     .replace("\r", "")
 
                 webView.post {
-                    webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
+                    if (viewPageLoaded) {
+                        webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
+                    } else {
+                        // Tenta novamente após atraso
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
+                        }, 300)
+                    }
                 }
             } else {
                 webView.post {
