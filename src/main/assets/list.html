@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Lista de Arquivos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .menu-config {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .config-btn {
+            background-color: #95a5a6;
+            border: none;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 18px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .config-btn:hover {
+            background-color: #7f8c8d;
+        }
+        .config-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+            min-width: 200px;
+        }
+        .config-dropdown.show {
+            display: block;
+        }
+        .config-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .config-item:last-child {
+            border-bottom: none;
+        }
+        .config-item:hover {
+            background-color: #f8f9fa;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 40px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+        li:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        function abrirPastaAndroid() {
+            if (window.Android && window.Android.abrirPasta) {
+                window.Android.abrirPasta();
+            }
+            // Fechar o dropdown após clicar
+            document.getElementById('configDropdown').classList.remove('show');
+        }
+
+        function receberArquivos(arquivosJson) {
+            const arquivos = JSON.parse(arquivosJson);
+            let listaHtml = "<ul>";
+            arquivos.forEach(nome => {
+                listaHtml += `<li onclick="lerArquivo('${nome}')">${nome}</li>`;
+            });
+            listaHtml += "</ul>";
+            document.getElementById("resultado").innerHTML = listaHtml;
+        }
+
+        function lerArquivo(nome) {
+            if (window.Android && window.Android.lerArquivo) {
+                window.Android.lerArquivo(nome);
+            }
+        }
+
+        function toggleConfig() {
+            const dropdown = document.getElementById('configDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Fechar dropdown ao clicar fora
+        window.onclick = function(event) {
+            if (!event.target.matches('.config-btn')) {
+                const dropdown = document.getElementById('configDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="menu-config">
+    <button class="config-btn" onclick="toggleConfig()">⚙️</button>
+    <div id="configDropdown" class="config-dropdown">
+        <div class="config-item" onclick="abrirPastaAndroid()">📁 Selecionar Pasta</div>
+    </div>
+</div>
+
+<h2>Lista de Arquivos</h2>
+<div id="resultado">
+    <p>Clique no menu de configurações (⚙️) para selecionar uma pasta.</p>
+</div>
+</body>
+</html>

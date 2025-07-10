@@ -1,0 +1,56 @@
+Navegação e Busca
+
+Ctrl + Shift + A - Buscar ações/comandos
+Ctrl + N - Buscar classes
+Ctrl + Shift + N - Buscar arquivos
+Ctrl + Alt + Shift + N - Buscar símbolos
+Ctrl + E - Arquivos recentes
+Ctrl + Shift + E - Arquivos editados recentemente
+Ctrl + G - Ir para linha específica
+Ctrl + B - Ir para declaração
+Alt + F7 - Buscar usos
+
+Edição de Código
+
+Ctrl + D - Duplicar linha
+Ctrl + Y - Deletar linha
+Ctrl + / - Comentar/descomentar linha
+Ctrl + Shift + / - Comentar/descomentar bloco
+Ctrl + Alt + L - Formatar código
+Ctrl + Alt + O - Organizar imports
+Shift + F6 - Renomear
+Ctrl + Alt + M - Extrair método
+Ctrl + Alt + V - Extrair variável
+
+Compilação e Execução
+
+Ctrl + F9 - Compilar projeto
+Shift + F10 - Executar app
+Shift + F9 - Executar em modo debug
+Ctrl + F2 - Parar execução
+
+Debug
+
+F8 - Step over (próxima linha)
+F7 - Step into (entrar na função)
+Shift + F8 - Step out (sair da função)
+F9 - Resume (continuar execução)
+Ctrl + F8 - Toggle breakpoint
+
+Interface
+
+Alt + 1 - Mostrar/ocultar Project view
+Alt + 6 - Mostrar/ocultar Logcat
+Alt + 7 - Mostrar/ocultar Structure
+Shift + Escape - Fechar janela ativa
+Ctrl + Shift + F12 - Maximizar editor
+Ctrl + Tab - Alternar entre abas
+
+Úteis Gerais
+
+Ctrl + Z - Desfazer
+Ctrl + Shift + Z - Refazer
+Ctrl + F - Buscar no arquivo
+Ctrl + R - Substituir no arquivo
+Ctrl + Shift + F - Buscar em todo projeto
+Ctrl + Shift + R - Substituir em todo projeto

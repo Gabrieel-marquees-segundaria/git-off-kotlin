@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Comunicação Android ↔ JS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        button {
+            background-color: #3498db;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 40px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+        li:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        function abrirPastaAndroid() {
+            if (window.Android && window.Android.abrirPasta) {
+                window.Android.abrirPasta();
+            }
+        }
+
+        function receberArquivos(arquivosJson) {
+            const arquivos = JSON.parse(arquivosJson);
+            let listaHtml = "<ul>";
+            arquivos.forEach(nome => {
+                listaHtml += `<li onclick="lerArquivo('${nome}')">${nome}</li>`;
+            });
+            listaHtml += "</ul>";
+            document.getElementById("resultado").innerHTML = listaHtml;
+        }
+
+        function lerArquivo(nome) {
+            if (window.Android && window.Android.lerArquivo) {
+                window.Android.lerArquivo(nome);
+            }
+        }
+
+        function mostrarConteudo(conteudo) {
+            document.getElementById("resultado").innerHTML =
+                "<h3>Conteúdo do arquivo:</h3><pre>" + conteudo + "</pre>";
+        }
+    </script>
+</head>
+<body>
+<h2>Leitor de Arquivos</h2>
+<button onclick="abrirPastaAndroid()">Selecionar Pasta via Android</button>
+<div id="resultado"></div>
+</body>
+</html>
