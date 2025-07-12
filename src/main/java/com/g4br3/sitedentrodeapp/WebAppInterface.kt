@@ -1,6 +1,7 @@
 package com.g4br3.sitedentrodeapp
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -41,11 +42,33 @@ class WebAppInterface(
             }
         }
     }
+    @JavascriptInterface
+    fun set_home(file: String){
+        println(file)
+    }
+    
 
     @JavascriptInterface
     fun voltarParaLista() {
         currentSite("list"){
             listarArquivos()
+        }
+    }
+    /** Escapa string para ser segura dentro de JavaScript inline */
+    private fun escaparParaJavascript(codigo: String): String {
+        return codigo
+            .replace("\\", "\\\\")
+            .replace("'", "\\'")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "")
+    }
+    /** Injeta código JavaScript diretamente na WebView, com escape automático */
+    @JavascriptInterface
+    fun injetarJavascript(codigo: String) {
+        val codigoSeguro = escaparParaJavascript(codigo)
+        webView.post {
+            webView.evaluateJavascript(codigoSeguro, null)
         }
     }
 
