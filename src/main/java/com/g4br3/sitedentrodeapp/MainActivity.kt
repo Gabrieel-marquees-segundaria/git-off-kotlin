@@ -13,6 +13,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import com.g4br3.sitedentrodeapp.components.WebViewScreen
+import com.g4br3.sitedentrodeapp.components.StorageHelper
 import org.json.JSONArray
 import java.io.File
 /**
@@ -23,6 +24,8 @@ class MainActivity : ComponentActivity() {
 
     // Armazena a URI da pasta selecionada pelo usuário
     private var selectedFolderUri: Uri? = null
+    private lateinit var storageHelper: StorageHelper
+
 
     // Referência à WebView para comunicação com JavaScript
     private var webViewRef: WebView? = null
@@ -35,6 +38,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        storageHelper = StorageHelper(this)
+
 
 
 
@@ -99,7 +104,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-
+                    jsInject(webView,"document.body.style.backgroundColor = 'red';")
 
 
                 }
@@ -169,17 +174,25 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    private fun jsInject(webView:WebView,javascript: String){
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                view?.evaluateJavascript(javascript, null)
+            }
+        }
 
+    }
     private fun salvarUri(uri: Uri) {
-        val prefs = getSharedPreferences("meu_app_prefs", MODE_PRIVATE)
-        prefs.edit().putString("uri_salva", uri.toString()).apply()
+
+        storageHelper.salvarString("uri_salva", uri.toString())
         println("uri salva com sucesso")
 
     }
 
     private fun recuperarUri(): Uri? {
-        val prefs = getSharedPreferences("meu_app_prefs", MODE_PRIVATE)
-        val uriString = prefs.getString("uri_salva", null)
+
+        val uriString = storageHelper.recuperarString("uri_salva")
         return uriString?.let { Uri.parse(it) }
     }
 
