@@ -32,7 +32,9 @@ class StorageHelper(private val context: Context) {
      * @return String salva ou null se não encontrada
      */
     fun recuperarString(chave: String): String? {
+        println("Valor salvo com sucesso: = $chave")
         return prefs.getString(chave, null)
+
     }
 }
 

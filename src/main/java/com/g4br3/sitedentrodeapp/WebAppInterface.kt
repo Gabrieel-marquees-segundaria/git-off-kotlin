@@ -10,6 +10,9 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import android.webkit.WebViewClient
+
+import com.g4br3.sitedentrodeapp.components.WebFiles
+import com.g4br3.sitedentrodeapp.components.FileName
 /**
  * Interface entre o JavaScript da WebView e o código nativo Android.
  * Permite executar funções Kotlin diretamente do JavaScript.
@@ -21,26 +24,44 @@ import android.webkit.WebViewClient
 class WebAppInterface(
     private val context: Context,
     private val webView: WebView,
+    private val webFiles: WebFiles,
+    private val abrirArquivoCallback: (String) -> Unit,
     private val listarArquivos: () -> Unit,
     private val abrirPastaCallback: () -> Unit
+
+
+
 ) {
     /** URI da pasta selecionada, atualizada pela MainActivity */
     var selectedFolderUri: Uri? = null
     var viewPageLoaded = false
 
-    fun currentSite(name: String = "list", onLoaded: (() -> Unit)? = null) {
+    fun currentSite(name: FileName = webFiles.webListName, onLoaded: (() -> Unit)? = null) {
         viewPageLoaded = false
         webView.post {
-            webView.loadUrl("file:///android_asset/$name.html")
-            webView.webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    if (url?.contains("$name.html") == true) {
-                        viewPageLoaded = true
-                        onLoaded?.invoke()
-                    }
-                }
-            }
+            //webView.loadUrl("file:///android_asset/$name.html")
+            webView.loadUrl(webFiles.getName(name))
+            webView.postDelayed({
+                val js = """
+                    console.log("JS injetado com delay");
+                    document.body.style.backgroundColor = 'red';
+                """.trimIndent()
+                webView.evaluateJavascript(js, null)
+
+                viewPageLoaded = true
+                onLoaded?.invoke()
+            }, 400)
+
         }
+    }
+
+    @JavascriptInterface
+    fun abrirArquivo(name: String) {
+        abrirArquivoCallback(name)
+    }
+    @JavascriptInterface
+    fun filesString() {
+        webView.evaluateJavascript("receberListaDeNomesHTML([${webFiles.webListName.value},${webFiles.webHtmlViewName.value}])", null)
     }
     @JavascriptInterface
     fun set_home(file: String){
@@ -50,7 +71,7 @@ class WebAppInterface(
 
     @JavascriptInterface
     fun voltarParaLista() {
-        currentSite("list"){
+        currentSite(webFiles.webListName){
             listarArquivos()
         }
     }
@@ -91,7 +112,7 @@ class WebAppInterface(
     /** Função chamada do JavaScript para ler o conteúdo de um arquivo da pasta. */
     @JavascriptInterface
     fun lerArquivo(caminhoRelativo: String) {
-        currentSite("view")
+        currentSite(webFiles.webHtmlViewName)
 
         selectedFolderUri?.let { baseUri ->
             val arquivo = localizarArquivoPorCaminho(baseUri, caminhoRelativo)

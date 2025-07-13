@@ -6,13 +6,37 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding-top: 80px;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
             background-color: #f5f7fa;
             color: #333;
         }
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: #34495e;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 999;
+                padding-top: 20px;
+        }
+        .top-bar h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: normal;
+        }
         .menu-config {
             position: fixed;
-            top: 20px;
+           top: 28px;
             right: 20px;
             z-index: 1000;
         }
@@ -88,6 +112,22 @@
             document.getElementById('configDropdown').classList.remove('show');
         }
 
+        function selecionarArquivoHome() {
+            if (window.Android && window.Android.abrirArquivo) {
+                window.Android.abrirArquivo("WebList");
+            }
+            // Fechar o dropdown após clicar
+            document.getElementById('configDropdown').classList.remove('show');
+        }
+
+        function selecionarArquivoView() {
+            if (window.Android && window.Android.abrirArquivo) {
+                window.Android.abrirArquivo("WebView");
+            }
+            // Fechar o dropdown após clicar
+            document.getElementById('configDropdown').classList.remove('show');
+        }
+
         function receberArquivos(arquivosJson) {
             const arquivos = JSON.parse(arquivosJson);
             let listaHtml = "<ul>";
@@ -121,14 +161,20 @@
     </script>
 </head>
 <body>
+<div class="top-bar">
+    <h1>Lista de Arquivos</h1>
+</div>
+
 <div class="menu-config">
     <button class="config-btn" onclick="toggleConfig()">⚙️</button>
     <div id="configDropdown" class="config-dropdown">
         <div class="config-item" onclick="abrirPastaAndroid()">📁 Selecionar Pasta</div>
+        <div class="config-item" onclick="selecionarArquivoHome()">🏠 Selecionar Arquivo Home</div>
+        <div class="config-item" onclick="selecionarArquivoView()">👁️ View</div>
     </div>
 </div>
 
-<h2>Lista de Arquivos</h2>
+<!--<h2 style="margin-top: 0;">Arquivos da Pasta</h2>-->
 <div id="resultado">
     <p>Clique no menu de configurações (⚙️) para selecionar uma pasta.</p>
 </div>

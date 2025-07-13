@@ -18,7 +18,9 @@ import android.annotation.SuppressLint
 @Composable
 fun WebViewScreen(
     url: String,
-    onWebViewReady: (WebView) -> Unit
+
+    onWebViewReady: (WebView) -> Unit,
+    onPageFinished: (() -> Unit)? = null // <- CALLBACK
 ) {
     // Estado para armazenar a referência da WebView criada
     var webView: WebView? by remember { mutableStateOf(null) }
@@ -29,32 +31,38 @@ fun WebViewScreen(
     // AndroidView é usado para integrar Views nativas do Android no Compose
     AndroidView(
         factory = { ctx ->
+
             // Cria uma nova instância da WebView
             WebView(ctx).apply {
-                // Habilita JavaScript (necessário para muitos sites modernos)
                 settings.javaScriptEnabled = true
-
-                // Permite que a página seja carregada em modo de visão geral
                 settings.loadWithOverviewMode = true
-
-                // Habilita suporte a zoom na WebView
                 settings.setSupportZoom(true)
 
-                // Define um WebViewClient personalizado para interceptar eventos
+                // Define o WebViewClient ANTES de carregar a URL
                 webViewClient = object : WebViewClient() {
-                    // Chamado quando uma nova página começa a carregar
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                        // Atualiza o estado indicando se é possível voltar na navegação
                         podeVoltar = view?.canGoBack() ?: false
+                    }
+
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        super.onPageFinished(view, url)
+                        onPageFinished?.invoke()
+//                        view?.postDelayed({
+//                            val js = """
+//                    console.log("JS injetado com delay");
+//                    document.body.style.backgroundColor = 'red';
+//                """.trimIndent()
+//                            view.evaluateJavascript(js, null)
+//                        }, 10)
                     }
                 }
 
-                // Carrega a URL fornecida como parâmetro
+                // ✅ SÓ CHAMA DEPOIS DE DEFINIR O webViewClient
                 loadUrl(url)
 
-                // Chama o callback passando a instância da WebView
                 onWebViewReady(this)
             }
+
         },
         // Chamado quando a WebView é atualizada
         update = {
