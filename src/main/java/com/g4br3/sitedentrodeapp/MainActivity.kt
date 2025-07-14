@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -23,67 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import org.json.JSONArray
-import androidx.documentfile.provider.DocumentFile
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import com.g4br3.sitedentrodeapp.components.FileManager
+import androidx.core.net.toUri
 
-/**
- * Interface JavaScript para comunicação entre WebView e código nativo Android.
- *
- * Esta classe fornece métodos que podem ser chamados do JavaScript executado
- * no WebView para interagir com funcionalidades nativas do Android.
- *
- * @param context Contexto da aplicação Android
- * @param webView Instância do WebView para executar JavaScript
- * @param abrirPastaCallback Callback para abrir seletor de pasta
- */
-class WebAppInterface(
-    private val context: Context,
-    private val webView: WebView,
-    private val abrirPastaCallback: () -> Unit
-) {
-
-    private val TAG = "WebAppInterface"
-
-    init {
-        println("🔧 WebAppInterface: Inicializando interface JavaScript")
-        Log.d(TAG, "WebAppInterface inicializada com sucesso")
-    }
-
-    /**
-     * Método JavaScript para obter o nome do usuário.
-     *
-     * Este método é chamado do JavaScript e retorna o nome do usuário
-     * através da função JavaScript 'receberNome()'.
-     */
-    @JavascriptInterface
-    fun pegarNome() {
-        println("📱 WebAppInterface: Pedido de nome recebido do JavaScript")
-        Log.d(TAG, "Método pegarNome() chamado")
-
-        Toast.makeText(context, "Android recebeu pedido de nome", Toast.LENGTH_SHORT).show()
-        val nome = "Gabriel"
-
-        webView.post {
-            println("📤 WebAppInterface: Enviando nome '$nome' para JavaScript")
-            webView.evaluateJavascript("receberNome('$nome')", null)
-        }
-    }
-
-    /**
-     * Método JavaScript para abrir o seletor de pasta.
-     *
-     * Este método é chamado do JavaScript e aciona o callback
-     * para abrir o seletor de pasta do Android.
-     */
-    @JavascriptInterface
-    fun abrirPasta() {
-        println("📁 WebAppInterface: Solicitação para abrir pasta recebida")
-        Log.d(TAG, "Método abrirPasta() chamado")
-        abrirPastaCallback()
-    }
-}
 
 /**
  * Atividade principal da aplicação.
@@ -92,7 +35,7 @@ class WebAppInterface(
  * para seleção de arquivos HTML e listagem de arquivos em pastas.
  */
 class MainActivity : ComponentActivity() {
-
+    private lateinit var fileManager: FileManager
     private val TAG = "MainActivity"
     private var selectedFolderUri: Uri? = null
     private var webViewRef: WebView? = null
@@ -114,6 +57,8 @@ class MainActivity : ComponentActivity() {
 
         println("🚀 MainActivity: Iniciando onCreate()")
         Log.i(TAG, "MainActivity onCreate() iniciado")
+        fileManager = FileManager(this)
+
 
         enableEdgeToEdge()
         val uriSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
@@ -133,13 +78,21 @@ class MainActivity : ComponentActivity() {
                 Log.e(TAG, "Erro ao restaurar URI salva: ${e.message}")
             }
         }
+        val uriPathSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+            .getString("path_uri", null)
+        println("uriPathSalva: $uriPathSalva")
+        println("webview$webViewRef")
+        selectedFolderUri = uriPathSalva?.toUri()
 
 
-        
+
+
         // Registra o launcher SAF para seleção de pasta
         println("📋 MainActivity: Registrando launcher para seleção de pasta")
-        openDirectoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+
+        openDirectoryLauncher = this.registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
             println("📂 MainActivity: Resultado do seletor de pasta recebido")
+
 
             if (uri != null) {
                 println("✅ MainActivity: Pasta selecionada: $uri")
@@ -150,12 +103,16 @@ class MainActivity : ComponentActivity() {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
                 selectedFolderUri = uri
+                
+
                 Toast.makeText(this, "Pasta selecionada: $uri", Toast.LENGTH_LONG).show()
 
                 // Lista arquivos da pasta selecionada
                 webViewRef?.let {
                     println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
-                    listarArquivosDaPasta(uri, it)
+                    fileManager.listarArquivosDasPastas(uri, it, true)
+
+
                 }
             } else {
                 println("❌ MainActivity: Nenhuma pasta foi selecionada")
@@ -167,7 +124,7 @@ class MainActivity : ComponentActivity() {
 
         // Registra o launcher SAF para seleção de arquivo HTML
         println("📄 MainActivity: Registrando launcher para seleção de arquivo HTML")
-        openHtmlLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        openHtmlLauncher = this.registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             println("📄 MainActivity: Resultado do seletor de arquivo HTML recebido")
 
             if (uri != null) {
@@ -214,6 +171,7 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "carregarArquivoHtml() iniciado para URI: $uri")
 
         try {
+
             contentResolver.openInputStream(uri)?.use { inputStream ->
                 val reader = BufferedReader(InputStreamReader(inputStream))
                 val content = reader.readText()
@@ -233,42 +191,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Lista os arquivos de uma pasta selecionada e envia para o JavaScript.
-     *
-     * @param uri URI da pasta selecionada
-     * @param webView Instância do WebView para executar JavaScript
-     */
-    private fun listarArquivosDaPasta(uri: Uri, webView: WebView) {
-        println("📁 MainActivity: Iniciando listagem de arquivos para URI: $uri")
-        Log.d(TAG, "listarArquivosDaPasta() iniciado para URI: $uri")
 
-        val docFile = DocumentFile.fromTreeUri(this, uri)
-        val nomesArquivos = mutableListOf<String>()
-
-        if (docFile != null && docFile.isDirectory) {
-            println("📂 MainActivity: Pasta válida encontrada, listando arquivos...")
-            val arquivos = docFile.listFiles()
-
-            for (arquivo in arquivos) {
-                val nomeArquivo = arquivo.name ?: "Nome desconhecido"
-                nomesArquivos.add(nomeArquivo)
-                println("📄 MainActivity: Arquivo encontrado: $nomeArquivo")
-            }
-
-            println("📊 MainActivity: Total de ${nomesArquivos.size} arquivos encontrados")
-            Log.d(TAG, "Total de arquivos encontrados: ${nomesArquivos.size}")
-        } else {
-            println("❌ MainActivity: Pasta inválida ou não é um diretório")
-            Log.w(TAG, "DocumentFile inválido ou não é um diretório")
-        }
-
-        val arquivosJson = JSONArray(nomesArquivos).toString()
-        println("📤 MainActivity: Enviando lista de arquivos para JavaScript: $arquivosJson")
-        webView.evaluateJavascript("receberArquivos('$arquivosJson')", null)
-
-        Log.d(TAG, "listarArquivosDaPasta() concluído")
-    }
 
     /**
      * Tela principal que gerencia a seleção de arquivo HTML e exibição do WebView.
@@ -357,7 +280,11 @@ class MainActivity : ComponentActivity() {
                     settings.allowContentAccess = true
 
                     println("🔌 WebViewContainer: Adicionando interface JavaScript")
-                    val interfaceJS = WebAppInterface(ctx, this, abrirPastaCallback)
+                    val interfaceJS = WebAppInterface(ctx,
+                        this,
+                        abrirPastaCallback,
+                        null,
+                        {fileManager.listarArquivosDasPastas(selectedFolderUri,this)})
                     addJavascriptInterface(interfaceJS, "Android")
 
                     println("🎯 WebViewContainer: Configurando WebViewClient")
@@ -376,6 +303,7 @@ class MainActivity : ComponentActivity() {
 
                     println("📄 WebViewContainer: Carregando conteúdo HTML")
                     loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+
                 }
             },
             update = {
