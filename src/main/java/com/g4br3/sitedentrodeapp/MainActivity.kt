@@ -284,7 +284,7 @@ class MainActivity : ComponentActivity() {
                         this,
                         abrirPastaCallback,
                         null,
-                        {fileManager.listarArquivosDasPastas(selectedFolderUri,this)})
+                        { homeWebSite() })
                     addJavascriptInterface(interfaceJS, "Android")
 
                     println("🎯 WebViewContainer: Configurando WebViewClient")
@@ -319,5 +319,13 @@ class MainActivity : ComponentActivity() {
         }
 
         println("🏁 WebViewContainer: Composable WebViewContainer finalizado")
+    }
+    private fun homeWebSite(){
+        selectedFolderUri?.let {
+            webViewRef?.let { webView ->
+
+                fileManager.listarArquivosDasPastas(it,webView)
+            }
+        }
     }
 }
