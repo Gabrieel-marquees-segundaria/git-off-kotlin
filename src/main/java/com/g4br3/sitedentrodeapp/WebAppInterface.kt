@@ -96,7 +96,7 @@ class WebAppInterface(
     }
     @JavascriptInterface
     fun listarArquivos(){
-        listarArquivos?.invoke()
+       webView.post {  listarArquivos?.invoke() }
     }
     /** Função chamada do JavaScript para solicitar um nome. */
     @JavascriptInterface

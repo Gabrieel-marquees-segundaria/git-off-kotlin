@@ -78,11 +78,33 @@ class MainActivity : ComponentActivity() {
                 Log.e(TAG, "Erro ao restaurar URI salva: ${e.message}")
             }
         }
-        val uriPathSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        var uriPathSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
             .getString("path_uri", null)
         println("uriPathSalva: $uriPathSalva")
         println("webview$webViewRef")
-        selectedFolderUri = Uri.parse(uriPathSalva)
+
+        if (uriPathSalva != null) {
+            Log.i(TAG, "onCreate: 'uriSalva' NÃO é nulo, tentando parsear.")
+            try {
+                Log.i(TAG, "onCreate: Chamando Uri.parse com: '$uriPathSalva'") // LOG IMPORTANTE
+                val uri = Uri.parse(uriPathSalva) // Esta é a linha mais provável
+                Log.i(TAG, "onCreate: Uri.parse bem-sucedido: '$uri'")
+
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                selectedFolderUri = uri
+                //carregarArquivoHtml(uri)
+            } catch (e: Exception) {
+                // Se for uma NullPointerException aqui, o catch genérico pode pegá-la.
+                // Verifique se 'e' é uma NullPointerException.
+                Log.e(TAG, "Erro ao restaurar URI salva: Tipo=${e::class.java.simpleName}, Msg=${e.message}", e)
+            }
+        } else {
+            Log.i(TAG, "onCreate: 'uriSalva' é nulo, pulando o bloco de restauração.")
+        }
+
 
 
 
@@ -111,7 +133,10 @@ class MainActivity : ComponentActivity() {
                 webViewRef?.let {
                     println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
                     fileManager.listarArquivosDasPastas(uri, it, true)
-
+                    getSharedPreferences("prefs", Context.MODE_PRIVATE)
+                        .edit()
+                        .putString("path_uri", uri.toString())
+                        .apply()
 
                 }
             } else {
@@ -284,7 +309,8 @@ class MainActivity : ComponentActivity() {
                         this,
                         abrirPastaCallback,
                         null,
-                        {fileManager.listarArquivosDasPastas(selectedFolderUri,this)})
+                        { homeWebSite() })
+                    interfaceJS.selectedFolderUri = selectedFolderUri
                     addJavascriptInterface(interfaceJS, "Android")
 
                     println("🎯 WebViewContainer: Configurando WebViewClient")
@@ -319,5 +345,13 @@ class MainActivity : ComponentActivity() {
         }
 
         println("🏁 WebViewContainer: Composable WebViewContainer finalizado")
+    }
+    private fun homeWebSite(){
+        selectedFolderUri?.let {
+            webViewRef?.let { webView ->
+
+                fileManager.listarArquivosDasPastas(it,webView)
+            }
+        }
     }
 }
