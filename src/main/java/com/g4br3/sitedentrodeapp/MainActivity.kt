@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
             .getString("path_uri", null)
         println("uriPathSalva: $uriPathSalva")
         println("webview$webViewRef")
-        selectedFolderUri = uriPathSalva?.toUri()
+        selectedFolderUri = Uri.parse(uriPathSalva)
 
 
 
