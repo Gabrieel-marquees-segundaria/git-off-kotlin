@@ -25,9 +25,18 @@ import androidx.compose.ui.viewinterop.AndroidView
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import com.g4br3.sitedentrodeapp.components.FileManager
+import com.g4br3.sitedentrodeapp.components.JSLoader
 import androidx.core.net.toUri
 
-
+/**
+ * Dados para representar uma função da WebAppInterface
+ */
+data class WebAppFunction(
+    val name: String,
+    val description: String,
+    val parameters: String = "",
+    val returnType: String = "void"
+)
 /**
  * Atividade principal da aplicação.
  *
@@ -36,6 +45,7 @@ import androidx.core.net.toUri
  */
 class MainActivity : ComponentActivity() {
     private lateinit var fileManager: FileManager
+    private lateinit var jsLoader: JSLoader
     private val TAG = "MainActivity"
     private var selectedFolderUri: Uri? = null
     private var webViewRef: WebView? = null
@@ -297,7 +307,7 @@ class MainActivity : ComponentActivity() {
                 Log.d("WebViewContainer", "Criando WebView")
 
                 WebView(ctx).apply {
-                    println("⚙️ WebViewContainer: Configurando settings do WebView")
+                    println("⚙️ WebViewContainer: Configurando settings-2 do WebView")
                     settings.javaScriptEnabled = true
                     settings.loadWithOverviewMode = true
                     settings.setSupportZoom(true)
@@ -324,6 +334,7 @@ class MainActivity : ComponentActivity() {
                         override fun onPageFinished(view: WebView?, url: String?) {
                             println("✅ WebViewContainer: Página carregada: $url")
                             Log.d("WebViewContainer", "Página carregada: $url")
+                            loadJS()
                         }
                     }
 
@@ -353,5 +364,28 @@ class MainActivity : ComponentActivity() {
                 fileManager.listarArquivosDasPastas(it,webView)
             }
         }
+    }
+    private fun loadJS(){
+//        jsLoader = JSLoader(this)
+//        val jsList: List<String> = jsLoader.jsList
+//        webViewRef?.let { webView ->
+//            jsList.forEach {code ->
+//                println("item da lista de javascript scripts: ${code.take(20)}")
+//                webView.post {
+//                    webView.evaluateJavascript(code, null)
+//                }
+//            }
+//
+//
+//        }
+        jsLoader = JSLoader(this)
+        val code: String = jsLoader.JsJuncao()
+        webViewRef?.let { webView ->
+                println("item da lista de javascript scripts: ${code.take(20)}")
+                webView.post {
+                    webView.evaluateJavascript(code, null)
+                }
+            }
+
     }
 }
