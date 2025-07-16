@@ -1,6 +1,6 @@
 package com.g4br3.sitedentrodeapp.components
 
-class StyleCssInject {
+class loadModelsEx {
     var css = """
         
     """.trimIndent()

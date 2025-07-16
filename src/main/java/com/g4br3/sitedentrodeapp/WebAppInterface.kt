@@ -23,87 +23,99 @@ class WebAppInterface(
     private val webView: WebView,
     private val abrirPastaCallback: () -> Unit,
     private val abrirArquivoCallback: ((String) -> Unit)?,
-     val listarArquivos: (() -> Unit)?
-
-
-
-
+    val listarArquivos: (() -> Unit)?
 ) {
     /** URI da pasta selecionada, atualizada pela MainActivity */
     var selectedFolderUri: Uri? = null
+        set(value) {
+            field = value
+            Log.d(TAG, "selectedFolderUri atualizada: $value")
+        }
+
     var viewPageLoaded = false
+        set(value) {
+            field = value
+            Log.d(TAG, "viewPageLoaded alterado para: $value")
+        }
+
     private val TAG = "WebAppInterface"
 
     init {
-        println("🔧 WebAppInterface: Inicializando interface JavaScript")
+        Log.i(TAG, "🔧 WebAppInterface: Inicializando interface JavaScript")
         Log.d(TAG, "WebAppInterface inicializada com sucesso")
+        Log.d(TAG, "Context: ${context.javaClass.simpleName}")
+        Log.d(TAG, "WebView: ${webView.javaClass.simpleName}")
+        Log.d(TAG, "AbrirPastaCallback: ${if (abrirPastaCallback != null) "Configurado" else "Não configurado"}")
+        Log.d(TAG, "AbrirArquivoCallback: ${if (abrirArquivoCallback != null) "Configurado" else "Não configurado"}")
+        Log.d(TAG, "ListarArquivos: ${if (listarArquivos != null) "Configurado" else "Não configurado"}")
     }
-//    fun currentSite(name: FileName = webFiles.webListName, onLoaded: (() -> Unit)? = null) {
-//        viewPageLoaded = false
-//        webView.post {
-//            //webView.loadUrl("file:///android_asset/$name.html")
-//            webView.loadUrl(webFiles.getName(name))
-//            webView.postDelayed({
-//                val js = """
-//                    console.log("JS injetado com delay");
-//                    document.body.style.backgroundColor = 'red';
-//                """.trimIndent()
-//                webView.evaluateJavascript(js, null)
-//
-//                viewPageLoaded = true
-//                onLoaded?.invoke()
-//            }, 400)
-//
-//        }
-//    }
 
     @JavascriptInterface
     fun abrirArquivo(name: String) {
+        Log.d(TAG, "📄 abrirArquivo chamado com parâmetro: '$name'")
+        // TODO: Implementar lógica
+        Log.w(TAG, "abrirArquivo não implementado - callback comentado")
         //abrirArquivoCallback(name)
     }
+
     @JavascriptInterface
     fun filesString() {
-      //  webView.evaluateJavascript("receberListaDeNomesHTML([${webFiles.webListName.value},${webFiles.webHtmlViewName.value}])", null)
+        Log.d(TAG, "📋 filesString() chamado")
+        // TODO: Implementar lógica
+        Log.w(TAG, "filesString não implementado - código comentado")
+        //webView.evaluateJavascript("receberListaDeNomesHTML([${webFiles.webListName.value},${webFiles.webHtmlViewName.value}])", null)
     }
+
     @JavascriptInterface
     fun set_home(file: String){
+        Log.d(TAG, "🏠 set_home chamado com parâmetro: '$file'")
         println(file)
     }
 
-
-//    @JavascriptInterface
-//    fun voltarParaLista() {
-//        currentSite(webFiles.webListName){
-//            listarArquivos()
-//        }
-//    }
     /** Escapa string para ser segura dentro de JavaScript inline */
     private fun escaparParaJavascript(codigo: String): String {
-        return codigo
+        Log.v(TAG, "🔄 Escapando código JavaScript (${codigo.length} caracteres)")
+        val resultado = codigo
             .replace("\\", "\\\\")
             .replace("'", "\\'")
             .replace("\"", "\\\"")
             .replace("\n", "\\n")
             .replace("\r", "")
+        Log.v(TAG, "✅ Código JavaScript escapado com sucesso")
+        return resultado
     }
+
     /** Injeta código JavaScript diretamente na WebView, com escape automático */
     @JavascriptInterface
     fun injetarJavascript(codigo: String) {
+        Log.d(TAG, "💉 injetarJavascript chamado com código de ${codigo.length} caracteres")
+        Log.v(TAG, "Código recebido: $codigo")
+        // TODO: Implementar lógica
+        Log.w(TAG, "injetarJavascript não implementado - código comentado")
 //        val codigoSeguro = escaparParaJavascript(codigo)
 //        webView.post {
 //            webView.evaluateJavascript(codigoSeguro, null)
 //        }
     }
+
     @JavascriptInterface
     fun listarArquivos(){
-       webView.post {  listarArquivos?.invoke() }
+        Log.d(TAG, "📁 listarArquivos() chamado do JavaScript")
+        webView.post {
+            Log.d(TAG, "Executando callback listarArquivos")
+            listarArquivos?.invoke()
+        }
     }
+
     /** Função chamada do JavaScript para solicitar um nome. */
     @JavascriptInterface
     fun pegarNome() {
+        Log.d(TAG, "👤 pegarNome() chamado")
         Toast.makeText(context, "Android recebeu pedido de nome", Toast.LENGTH_SHORT).show()
         val nome = "Gabriel"
+        Log.d(TAG, "Enviando nome '$nome' para JavaScript")
         webView.post {
+            Log.d(TAG, "Executando JavaScript: receberNome('$nome')")
             webView.evaluateJavascript("receberNome('$nome')", null)
         }
     }
@@ -116,58 +128,114 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun abrirPasta() {
-        println("📁 WebAppInterface: Solicitação para abrir pasta recebida")
-        Log.d(TAG, "Método abrirPasta() chamado")
-        abrirPastaCallback()
+        Log.i(TAG, "📁 WebAppInterface: Solicitação para abrir pasta recebida")
+        Log.d(TAG, "Método abrirPasta() chamado do JavaScript")
+        try {
+            abrirPastaCallback()
+            Log.d(TAG, "Callback abrirPasta executado com sucesso")
+        } catch (e: Exception) {
+            Log.e(TAG, "Erro ao executar callback abrirPasta", e)
+        }
     }
+
+
 
     /** Função chamada do JavaScript para ler o conteúdo de um arquivo da pasta. */
     @JavascriptInterface
     fun lerArquivo(caminhoRelativo: String) {
-        //currentSite(webFiles.webHtmlViewName)
-//
+        Log.i(TAG, "📖 lerArquivo chamado com caminho: '$caminhoRelativo'")
+
         selectedFolderUri?.let { baseUri ->
-            val arquivo = localizarArquivoPorCaminho(baseUri, caminhoRelativo)
-            if (arquivo != null && arquivo.isFile) {
-                val inputStream = context.contentResolver.openInputStream(arquivo.uri)
-                val conteudo = inputStream?.bufferedReader().use { it?.readText() } ?: "Erro ao ler arquivo"
+            Log.d(TAG, "URI da pasta base: $baseUri")
 
-                val conteudoEscapado = conteudo
-                    .replace("\\", "\\\\")
-                    .replace("'", "\\'")
-                    .replace("\n", "\\n")
-                    .replace("\r", "")
+            try {
+                val arquivo = localizarArquivoPorCaminho(baseUri, caminhoRelativo)
+                if (arquivo != null && arquivo.isFile) {
+                    Log.d(TAG, "Arquivo encontrado: ${arquivo.name}, URI: ${arquivo.uri}")
 
-                webView.post {
-                    if (viewPageLoaded) {
-                        webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
-                    } else {
-                        // Tenta novamente após atraso
-                        Handler(Looper.getMainLooper()).postDelayed({
+                    val inputStream = context.contentResolver.openInputStream(arquivo.uri)
+                    val conteudo = inputStream?.bufferedReader().use { it?.readText() } ?: "Erro ao ler arquivo"
+                    Log.d(TAG, "Conteúdo do arquivo lido: ${conteudo.length} caracteres")
+
+                    val conteudoEscapado = conteudo
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                        .replace("\r", "")
+                    Log.v(TAG, "Conteúdo escapado para JavaScript")
+
+                    webView.post {
+                        if (viewPageLoaded) {
+                            Log.d(TAG, "Página carregada, executando mostrarConteudo imediatamente")
                             webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
-                        }, 300)
+                        } else {
+                            Log.w(TAG, "Página não carregada, tentando novamente em 300ms")
+                            // Tenta novamente após atraso
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                Log.d(TAG, "Executando mostrarConteudo após delay")
+                                webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
+                            }, 300)
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "Arquivo não encontrado ou não é um arquivo válido: '$caminhoRelativo'")
+                    webView.post {
+                        Log.d(TAG, "Enviando mensagem de erro para JavaScript")
+                        webView.evaluateJavascript("mostrarConteudo('Arquivo não encontrado')", null)
                     }
                 }
-            } else {
+            } catch (e: Exception) {
+                Log.e(TAG, "Erro ao ler arquivo '$caminhoRelativo'", e)
                 webView.post {
-                    webView.evaluateJavascript("mostrarConteudo('Arquivo não encontrado')", null)
+                    webView.evaluateJavascript("mostrarConteudo('Erro ao ler arquivo: ${e.message}')", null)
                 }
+            }
+        } ?: run {
+            Log.w(TAG, "selectedFolderUri é null - nenhuma pasta selecionada")
+            webView.post {
+                webView.evaluateJavascript("mostrarConteudo('Nenhuma pasta selecionada')", null)
             }
         }
     }
 
     /** Percorre recursivamente a árvore DocumentFile para localizar um arquivo por caminho relativo. */
     private fun localizarArquivoPorCaminho(baseUri: Uri, caminhoRelativo: String): DocumentFile? {
-        val partes = caminhoRelativo.split("/")
-        var atual: DocumentFile? = DocumentFile.fromTreeUri(context, baseUri)
+        Log.d(TAG, "🔍 Localizando arquivo por caminho: '$caminhoRelativo'")
+        Log.d(TAG, "URI base: $baseUri")
 
-        for (parte in partes) {
-            atual = atual?.listFiles()?.firstOrNull { it.name == parte }
-            if (atual == null) break
+        try {
+            val partes = caminhoRelativo.split("/")
+            Log.d(TAG, "Caminho dividido em ${partes.size} partes: ${partes.joinToString(" -> ")}")
+
+            var atual: DocumentFile? = DocumentFile.fromTreeUri(context, baseUri)
+            Log.d(TAG, "DocumentFile raiz criado: ${atual?.name}")
+
+            for ((index, parte) in partes.withIndex()) {
+                Log.v(TAG, "Procurando parte $index: '$parte'")
+
+                val arquivos = atual?.listFiles()
+                Log.v(TAG, "Arquivos na pasta atual: ${arquivos?.size ?: 0}")
+
+                atual = arquivos?.firstOrNull { it.name == parte }
+
+                if (atual == null) {
+                    Log.w(TAG, "Parte '$parte' não encontrada na pasta atual")
+                    break
+                } else {
+                    Log.d(TAG, "Parte '$parte' encontrada: ${atual.name} (${if (atual.isDirectory) "pasta" else "arquivo"})")
+                }
+            }
+
+            if (atual != null) {
+                Log.i(TAG, "✅ Arquivo localizado com sucesso: ${atual.name}")
+            } else {
+                Log.w(TAG, "❌ Arquivo não encontrado: '$caminhoRelativo'")
+            }
+
+            return atual
+        } catch (e: Exception) {
+            Log.e(TAG, "Erro ao localizar arquivo '$caminhoRelativo'", e)
+            return null
         }
-        return atual
     }
-
-
-
 }

@@ -44,6 +44,7 @@ data class WebAppFunction(
  * para seleção de arquivos HTML e listagem de arquivos em pastas.
  */
 class MainActivity : ComponentActivity() {
+    private lateinit var interfaceJS: WebAppInterface
     private lateinit var fileManager: FileManager
     private lateinit var jsLoader: JSLoader
     private val TAG = "MainActivity"
@@ -149,6 +150,7 @@ class MainActivity : ComponentActivity() {
                         .apply()
 
                 }
+                interfaceJSupdate()
             } else {
                 println("❌ MainActivity: Nenhuma pasta foi selecionada")
                 Log.w(TAG, "Nenhuma pasta selecionada pelo usuário")
@@ -315,14 +317,14 @@ class MainActivity : ComponentActivity() {
                     settings.allowContentAccess = true
 
                     println("🔌 WebViewContainer: Adicionando interface JavaScript")
-                    val interfaceJS = WebAppInterface(ctx,
+                     interfaceJS = WebAppInterface(ctx,
                         this,
                         abrirPastaCallback,
                         null,
                         { homeWebSite() })
-                    interfaceJS.selectedFolderUri = selectedFolderUri
-                    addJavascriptInterface(interfaceJS, "Android")
 
+                    addJavascriptInterface(interfaceJS, "Android")
+                    interfaceJSupdate()
                     println("🎯 WebViewContainer: Configurando WebViewClient")
                     webViewClient = object : WebViewClient() {
                         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -387,5 +389,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+    }
+   private fun interfaceJSupdate(){
+       interfaceJS.selectedFolderUri = selectedFolderUri
     }
 }
