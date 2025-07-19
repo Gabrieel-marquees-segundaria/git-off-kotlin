@@ -10,11 +10,11 @@
 
     <ImageView
         android:id="@+id/splashLogo"
-        android:layout_width="341dp"
-        android:layout_height="330dp"
+        android:layout_width="1164dp"
+        android:layout_height="655dp"
         android:layout_marginBottom="32dp"
         android:contentDescription="@string/app_name"
-        android:src="@mipmap/ic_launcher_foreground"
+        android:src="@mipmap/sem_fundo_foreground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

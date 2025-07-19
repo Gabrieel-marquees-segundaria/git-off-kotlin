@@ -14,7 +14,9 @@ class Info(applicationContext: Context) {
 
     @RequiresApi(Build.VERSION_CODES.P)
     public var all = mapOf(
-        "packageName" to packageInfo.packageName,
+        "js-functions-usables" to "mostrarStatus, mostrarConteudo,",
+        "js-list-editables" to "FloatingMenuConfig.menuItems",
+                "packageName" to packageInfo.packageName,
         "versionName" to packageInfo.versionName,
         "versionCode" to packageInfo.longVersionCode,
         "appName" to appInfo.loadLabel(packageManager).toString(),

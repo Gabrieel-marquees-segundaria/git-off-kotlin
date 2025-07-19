@@ -5,7 +5,7 @@
 <style name="Theme.App.SplashScreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     <!-- Atributos da API de Splash Screen do Android 12+ -->
     <item name="windowSplashScreenBackground">@color/splash_background</item>
-    <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+    <item name="windowSplashScreenAnimatedIcon">@mipmap/sem_fundo_foreground</item>
     <item name="windowSplashScreenAnimationDuration">1000</item> <!-- Opcional -->
     <item name="postSplashScreenTheme">@style/Theme.SiteDentroDeApp</item> <!-- Tema para aplicar após a splash -->
 
