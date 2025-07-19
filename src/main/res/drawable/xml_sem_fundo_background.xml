@@ -1,0 +1,12 @@
+<!-- res/drawable/sem_fundo_background.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- cor de fundo -->
+    <item android:drawable="@android:color/white" />
+
+    <!-- imagem central -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/sem_fundo_background" />
+    </item>
+</layer-list>

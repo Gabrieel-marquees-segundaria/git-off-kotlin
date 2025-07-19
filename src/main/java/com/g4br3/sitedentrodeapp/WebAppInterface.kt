@@ -2,14 +2,21 @@ package com.g4br3.sitedentrodeapp
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
+import com.g4br3.sitedentrodeapp.components.Info
 
+import com.g4br3.sitedentrodeapp.components.UriSaveList
+import org.json.JSONObject
+
+var uriSaveList: UriSaveList = UriSaveList()
 /**
  * Interface entre o JavaScript da WebView e o código nativo Android.
  * Permite executar funções Kotlin diretamente do JavaScript.
@@ -22,9 +29,10 @@ class WebAppInterface(
     private val context: Context,
     private val webView: WebView,
     private val abrirPastaCallback: () -> Unit,
-    private val abrirArquivoCallback: ((String) -> Unit)?,
+    private val abrirPasrtasCallback: (name: String, on_selected: (Uri) -> Unit)-> Unit,
     val listarArquivos: (() -> Unit)?
 ) {
+    private var info = Info(context)
     /** URI da pasta selecionada, atualizada pela MainActivity */
     var selectedFolderUri: Uri? = null
         set(value) {
@@ -46,7 +54,7 @@ class WebAppInterface(
         Log.d(TAG, "Context: ${context.javaClass.simpleName}")
         Log.d(TAG, "WebView: ${webView.javaClass.simpleName}")
         Log.d(TAG, "AbrirPastaCallback: ${if (abrirPastaCallback != null) "Configurado" else "Não configurado"}")
-        Log.d(TAG, "AbrirArquivoCallback: ${if (abrirArquivoCallback != null) "Configurado" else "Não configurado"}")
+        Log.d(TAG, "AbrirArquivoCallback: ${if (abrirPasrtasCallback != null) "Configurado" else "Não configurado"}")
         Log.d(TAG, "ListarArquivos: ${if (listarArquivos != null) "Configurado" else "Não configurado"}")
     }
 
@@ -138,8 +146,21 @@ class WebAppInterface(
         }
     }
 
+    /** salvar uri de pasta com modulos externos da interface */
+    @JavascriptInterface
+    fun setExternModels(){
+        Log.i(TAG, "selecionando modulo externo")
+        abrirPasrtasCallback(uriSaveList.externalModulejs.key){
+            Log.i(TAG, " modulo externo selected")
+        }
 
+    }
+    @RequiresApi(Build.VERSION_CODES.P)
+    @JavascriptInterface
+    fun getAllInfo():String{
+      return JSONObject(this.info.all).toString()
 
+    }
     /** Função chamada do JavaScript para ler o conteúdo de um arquivo da pasta. */
     @JavascriptInterface
     fun lerArquivo(caminhoRelativo: String) {
@@ -173,7 +194,7 @@ class WebAppInterface(
                             // Tenta novamente após atraso
                             Handler(Looper.getMainLooper()).postDelayed({
                                 Log.d(TAG, "Executando mostrarConteudo após delay")
-                                webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
+                                webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado','$caminhoRelativo')", null)
                             }, 300)
                         }
                     }

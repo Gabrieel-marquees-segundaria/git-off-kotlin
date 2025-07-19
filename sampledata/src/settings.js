@@ -16,34 +16,27 @@ class FloatingMenu {
     }
 
     createMenuButton() {
-        this.menuButton = document.createElement("button");
-        this.menuButton.className = "floating-menu-button";
-        this.menuButton.innerHTML = `
-            <div class="burger-icon">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        `;
+// Altere estas linhas no método createMenuButton():
 
-        // Estilos inline para o botão principal
-        Object.assign(this.menuButton.style, {
-            position: "fixed",
-            top: "40px",
-            left: "20px",
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #3498db, #2980b9)",
-            border: "none",
-            cursor: "pointer",
-            zIndex: "1000",
-            boxShadow: "0 4px 20px rgba(52, 152, 219, 0.4)",
-            transition: "all 0.3s ease",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-        });
+Object.assign(this.menuButton.style, {
+    position: "fixed",
+    top: "40px",
+    left: "20px",
+    width: "45px",        // Reduzido de 60px para 45px
+    height: "45px",       // Reduzido de 60px para 45px
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #3498db, #2980b9)",
+    border: "none",
+    cursor: "pointer",
+    zIndex: "1000",
+    boxShadow: "0 4px 20px rgba(52, 152, 219, 0.4)",
+    transition: "all 0.3s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+});
+
+
 
         document.body.appendChild(this.menuButton);
     }
@@ -176,49 +169,51 @@ class FloatingMenu {
     }
 
     addBurgerStyles() {
-        const style = document.createElement("style");
-        style.textContent = `
-            .burger-icon {
-                width: 24px;
-                height: 18px;
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-            
-            .burger-icon span {
-                display: block;
-                height: 2px;
-                width: 100%;
-                background: white;
-                border-radius: 1px;
-                transition: all 0.3s ease;
-            }
-            
-            .burger-icon.open span:nth-child(1) {
-                transform: rotate(45deg) translate(5px, 5px);
-            }
-            
-            .burger-icon.open span:nth-child(2) {
-                opacity: 0;
-            }
-            
-            .burger-icon.open span:nth-child(3) {
-                transform: rotate(-45deg) translate(7px, -6px);
-            }
-            
-            .menu-item-icon {
-                font-size: 18px;
-                margin-right: 12px;
-            }
-            
-            .menu-item-text {
-                font-size: 14px;
-                font-weight: 500;
-                color: #2c3e50;
-            }
-        `;
+ // E também ajuste o tamanho do ícone burger no método addBurgerStyles():
+
+const style = document.createElement("style");
+style.textContent = `
+    .burger-icon {
+        width: 18px;          // Reduzido de 24px para 18px
+        height: 14px;         // Reduzido de 18px para 14px
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .burger-icon span {
+        display: block;
+        height: 2px;
+        width: 100%;
+        background: white;
+        border-radius: 1px;
+        transition: all 0.3s ease;
+    }
+    
+    .burger-icon.open span:nth-child(1) {
+        transform: rotate(45deg) translate(4px, 4px);  // Ajustado para o novo tamanho
+    }
+    
+    .burger-icon.open span:nth-child(2) {
+        opacity: 0;
+    }
+    
+    .burger-icon.open span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);  // Ajustado para o novo tamanho
+    }
+    
+    .menu-item-icon {
+        font-size: 18px;
+        margin-right: 12px;
+    }
+    
+    .menu-item-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+`;
 
         document.head.appendChild(style);
     }

@@ -24,7 +24,7 @@ class App {
         });
     }
 }
-
+const TAG = "GLOBAL"
 // Funções globais para serem chamadas pelo HTML e Android
 function abrirPastaAndroid() {
     fileManager.abrirPasta();
@@ -51,6 +51,7 @@ function receberArquivos(arquivosJson) {
 }
 
 function mostrarConteudo(conteudo, nomeArquivo) {
+
     fileManager.mostrarConteudo(conteudo, nomeArquivo);
 }
 
@@ -58,6 +59,8 @@ function mostrarConteudo(conteudo, nomeArquivo) {
 function mostrarStatus(mensagem, tipo = "info") {
     uiController.mostrarStatus(mensagem, tipo);
 }
-
+function setExternModels(){
+fileManager.setExternModels()
+}
 // Inicialização da aplicação
 const app = new App();

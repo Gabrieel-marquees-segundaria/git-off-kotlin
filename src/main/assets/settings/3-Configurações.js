@@ -14,7 +14,7 @@
         },
 
         button: {
-            position: { top: "40px", left: "20px" },
+            position: { top: "40px", left: "7px" },
             size: { width: "60px", height: "60px" },
             styles: {
                 borderRadius: "50%",
@@ -44,21 +44,31 @@
         },
 
         menuItems: [
+                            {
+                                icon: "ℹ️",
+                                text: "Information",
+                                action: "mostrarInfo"
+                            },
+                    {
+                        icon: "✏️",
+                        text: "Alterar Título",
+                        action: "alterarTitulo"
+                    },
             {
                 icon: "🗂️",
                 text: "Selecionar Pasta",
                 action: "abrirPastaAndroid"
+            },{
+              icon: "📚",
+              text: "selecionar Modulo Externo",
+              action: "setExternModels"
             },
             {
                 icon: "📋️",
                 text: "Listar Arquivos",
                 action: "listar_arquivos"
             },
-            {
-                icon: "✏️",
-                text: "Alterar Título",
-                action: "alterarTitulo"
-            },
+
             {
                 icon: "🗑️",
                 text: "Limpar",

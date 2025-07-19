@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.SiteDentroDeApp" parent="android:Theme.Material.Light.NoActionBar" />
+<!-- Tema para sua SplashActivity que é uma AppCompatActivity -->
+<style name="Theme.App.SplashScreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- Atributos da API de Splash Screen do Android 12+ -->
+    <item name="windowSplashScreenBackground">@color/splash_background</item>
+    <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+    <item name="windowSplashScreenAnimationDuration">1000</item> <!-- Opcional -->
+    <item name="postSplashScreenTheme">@style/Theme.SiteDentroDeApp</item> <!-- Tema para aplicar após a splash -->
+
+    <!-- Para compatibilidade com versões anteriores ao Android 12 (opcional, mas bom) -->
+    <!-- Você pode definir um windowBackground normal para versões mais antigas -->
+    <item name="android:windowBackground">@drawable/splesh_screen</item>
+</style>
+<style name="Theme.SiteDentroDeApp" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
+

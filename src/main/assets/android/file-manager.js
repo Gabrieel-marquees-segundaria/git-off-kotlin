@@ -112,6 +112,10 @@ class FileManager {
         appState.limparEstado();
         uiController.mostrarStatus("Resultado limpo.", "info");
     }
+    setExternModels(){
+ androidInterface.setExternModels()
+   uiController.mostrarStatus("Resultado limpo.", "info");
+}
 }
 
 // Instância global

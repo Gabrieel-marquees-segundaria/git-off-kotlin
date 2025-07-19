@@ -35,6 +35,14 @@ class AndroidInterface {
         return false;
     }
 
+    setExternModels(){
+            if (this.isAndroidAvailable) {
+                window.Android.setExternModels();
+                return true;
+            }
+            return false;
+    }
+
     // Métodos para simulação em navegador (desenvolvimento)
     simularAbrirPasta() {
         return new Promise((resolve) => {

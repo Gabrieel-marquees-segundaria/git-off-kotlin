@@ -9,7 +9,8 @@ class JSLoader(private val context: Context)  {
     var paths: List<String> = listOf<String>(
         "android",
         //"settings-2-testes",
-        "settings"
+        "settings",
+        "modulos"
     )
     init {
         val listaFinal = mutableListOf<String>()
@@ -26,7 +27,7 @@ class JSLoader(private val context: Context)  {
 
 fun JsJuncao(): String{
         var stringFinal = String()
-        var assetTextReader: AssetTextReader = AssetTextReader(context)
+        val assetTextReader: AssetTextReader = AssetTextReader(context)
         this.paths.forEach { name ->
             var assetJsString = assetTextReader.JuncaoDeConteudosDaPasta(name)
             if (assetJsString != null){

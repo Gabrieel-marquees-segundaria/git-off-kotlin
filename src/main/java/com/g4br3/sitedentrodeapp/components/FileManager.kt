@@ -1,6 +1,5 @@
 package com.g4br3.sitedentrodeapp.components
 
-
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -12,39 +11,41 @@ import java.io.File
 import java.io.InputStreamReader
 
 class FileManager(context: Context) {
-    var TAG: String = "FileManager"
-    var CONTEXT: Context = context
-    var isHtmlLoaded: Boolean = false
-    lateinit var htmlContent: String
+    companion object {
+        private const val TAG = "FileManager"
+        private const val CACHE_FILE_NAME = "lista_arquivos.txt"
+    }
+
+     val context: Context = context
+    var isLoaded: Boolean = false
+    var Content: String = ""
+        private set
+
     /**
      * Carrega o conteúdo de um arquivo HTML selecionado.
      *
      * @param uri URI do arquivo HTML selecionado
+     * @return true se carregou com sucesso, false caso contrário
      */
-    private fun carregarArquivoHtml(uri: Uri) {
-        println("📖 MainActivity: Iniciando carregamento do arquivo HTML")
+    fun carregarArquivo(uri: Uri, type:String="txt"): Boolean {
         Log.d(TAG, "carregarArquivoHtml() iniciado para URI: $uri")
 
-        try {
-            CONTEXT.contentResolver.openInputStream(uri)?.use { inputStream ->
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val reader = BufferedReader(InputStreamReader(inputStream))
                 val content = reader.readText()
 
-                println("📄 MainActivity: Conteúdo HTML carregado (${content.length} caracteres)")
-                Log.d(TAG, "Conteúdo HTML carregado com sucesso")
+                Log.d(TAG, "Conteúdo $type carregado com sucesso (${content.length} caracteres)")
 
-                htmlContent = content
-                isHtmlLoaded = true
-
-               // Toast.makeText(this, "Arquivo HTML carregado com sucesso", Toast.LENGTH_SHORT).show()
-            }
+                Content = content
+                isLoaded = true
+                true
+            } ?: false
         } catch (e: Exception) {
-            println("❌ MainActivity: Erro ao carregar arquivo HTML: ${e.message}")
-            Log.e(TAG, "Erro ao carregar arquivo HTML", e)
-          //  Toast.makeText(this, "Erro ao carregar arquivo HTML: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "Erro ao carregar arquivo ", e)
+            false
         }
     }
-
 
     /**
      * Lista os arquivos de uma pasta selecionada e envia para o JavaScript.
@@ -52,90 +53,127 @@ class FileManager(context: Context) {
      * @param uri URI da pasta selecionada
      * @param webView Instância do WebView para executar JavaScript
      */
-     fun listarArquivosDaPasta(uri: Uri, webView: WebView) {
-        println("📁 MainActivity: Iniciando listagem de arquivos para URI: $uri")
+    fun listarArquivosDaPasta(uri: Uri, webView: WebView) {
         Log.d(TAG, "listarArquivosDaPasta() iniciado para URI: $uri")
 
-        val docFile = DocumentFile.fromTreeUri(CONTEXT, uri)
-        val nomesArquivos = mutableListOf<String>()
+        try {
+            val docFile = DocumentFile.fromTreeUri(context, uri)
+            val nomesArquivos = mutableListOf<String>()
 
-        if (docFile != null && docFile.isDirectory) {
-            println("📂 MainActivity: Pasta válida encontrada, listando arquivos...")
-            val arquivos = docFile.listFiles()
+            if (docFile != null && docFile.isDirectory) {
+                Log.d(TAG, "Pasta válida encontrada, listando arquivos...")
+                val arquivos = docFile.listFiles()
 
-            for (arquivo in arquivos) {
-                val nomeArquivo = arquivo.name ?: "Nome desconhecido"
-                nomesArquivos.add(nomeArquivo)
-                println("📄 MainActivity: Arquivo encontrado: $nomeArquivo")
+                for (arquivo in arquivos) {
+                    val nomeArquivo = arquivo.name ?: "Nome desconhecido"
+                    nomesArquivos.add(nomeArquivo)
+                    Log.d(TAG, "Arquivo encontrado: $nomeArquivo")
+                }
+
+                Log.d(TAG, "Total de arquivos encontrados: ${nomesArquivos.size}")
+            } else {
+                Log.w(TAG, "DocumentFile inválido ou não é um diretório")
             }
 
-            println("📊 MainActivity: Total de ${nomesArquivos.size} arquivos encontrados")
-            Log.d(TAG, "Total de arquivos encontrados: ${nomesArquivos.size}")
-        } else {
-            println("❌ MainActivity: Pasta inválida ou não é um diretório")
-            Log.w(TAG, "DocumentFile inválido ou não é um diretório")
+            val arquivosJson = JSONArray(nomesArquivos).toString()
+            enviarArquivosParaJavaScript(webView, arquivosJson)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Erro ao listar arquivos da pasta", e)
+            enviarArquivosParaJavaScript(webView, "[]")
         }
-
-        val arquivosJson = JSONArray(nomesArquivos).toString()
-        println("📤 MainActivity: Enviando lista de arquivos para JavaScript: $arquivosJson")
-        webView.evaluateJavascript("receberArquivos('$arquivosJson')", null)
-
-        Log.d(TAG, "listarArquivosDaPasta() concluído")
     }
 
+    /**
+     * Função recursiva que percorre arquivos e subpastas, construindo o caminho relativo.
+     *
+     * @param pasta DocumentFile da pasta atual
+     * @param caminhoAtual Caminho relativo atual (usado para construir hierarquia)
+     * @param resultado Lista para armazenar os caminhos dos arquivos
+     */
+    private fun percorrerPasta(
+        pasta: DocumentFile?,
+        caminhoAtual: String = "",
+        resultado: MutableList<String>
+    ) {
+        if (pasta != null && pasta.isDirectory) {
+            for (arquivo in pasta.listFiles()) {
+                val nome = arquivo.name ?: continue
+                val caminhoRelativo = if (caminhoAtual.isEmpty()) nome else "$caminhoAtual/$nome"
 
-
+                if (arquivo.isDirectory) {
+                    percorrerPasta(arquivo, caminhoRelativo, resultado)
+                } else if (arquivo.isFile) {
+                    resultado.add(caminhoRelativo)
+                }
+            }
+        }
+    }
 
     /**
      * Lista todos os arquivos da pasta selecionada (inclusive subpastas) e envia ao JavaScript.
      *
      * @param uri URI da pasta selecionada
      * @param webView Instância da WebView para comunicação com JavaScript
+     * @param forceRefresh Se true, força a atualização do cache
      */
-     fun listarArquivosDasPastas(uri: Uri?, webView: WebView, clear: Boolean =false) {
-        val nomeArquivoCache = "lista_arquivos.txt"
-        val arquivoCache = File(CONTEXT.filesDir, nomeArquivoCache)
-
-        if (arquivoCache.exists() and !clear) {
-            // Se já existe, lê o conteúdo e retorna ao JavaScript
-            val conteudo = arquivoCache.readText()
-            webView.evaluateJavascript("receberArquivos('$conteudo')", null)
+    fun listarArquivosDasPastas(uri: Uri?, webView: WebView, forceRefresh: Boolean = false) {
+        if (uri == null) {
+            Log.w(TAG, "URI é null")
+            enviarArquivosParaJavaScript(webView, "[]")
             return
         }
 
-        val docFile = DocumentFile.fromTreeUri(CONTEXT, uri)
-        val nomesArquivos = mutableListOf<String>()
-        /**
-         * Função recursiva que percorre arquivos e subpastas, construindo o caminho relativo.
-         *
-         * @param pasta DocumentFile da pasta atual
-         * @param caminhoAtual Caminho relativo atual (usado para construir hierarquia)
-         */
-        fun percorrerPasta(pasta: DocumentFile?, caminhoAtual: String = "") {
-            if (pasta != null && pasta.isDirectory) {
-                for (arquivo in pasta.listFiles()) {
-                    val nome = arquivo.name ?: continue
-                    val caminhoRelativo =
-                        if (caminhoAtual.isEmpty()) nome else "$caminhoAtual/$nome"
+        val arquivoCache = File(context.filesDir, CACHE_FILE_NAME)
 
-                    if (arquivo.isDirectory) {
-                        percorrerPasta(arquivo, caminhoRelativo)
-                    } else if (arquivo.isFile) {
-                        nomesArquivos.add(caminhoRelativo)
-                    }
-                }
+        try {
+            // Verifica se deve usar cache
+            if (arquivoCache.exists() && !forceRefresh) {
+                val conteudo = arquivoCache.readText()
+                enviarArquivosParaJavaScript(webView, conteudo)
+                return
             }
+
+            // Gera nova lista de arquivos
+            val docFile = DocumentFile.fromTreeUri(context, uri)
+            val nomesArquivos = mutableListOf<String>()
+
+            percorrerPasta(docFile, "", nomesArquivos)
+
+            val arquivosJson = JSONArray(nomesArquivos).toString()
+
+            // Salva no cache
+            arquivoCache.writeText(arquivosJson)
+
+            // Envia para o JavaScript
+            enviarArquivosParaJavaScript(webView, arquivosJson)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Erro ao listar arquivos das pastas", e)
+            enviarArquivosParaJavaScript(webView, "[]")
         }
-
-        percorrerPasta(docFile)
-
-        val arquivosJson = JSONArray(nomesArquivos).toString()
-
-        // Salva no arquivo local
-        arquivoCache.writeText(arquivosJson)
-
-        // Envia para o JavaScript
-        webView.evaluateJavascript("receberArquivos('$arquivosJson')", null)
     }
 
+    /**
+     * Envia a lista de arquivos para o JavaScript de forma segura.
+     *
+     * @param webView Instância do WebView
+     * @param arquivosJson JSON com a lista de arquivos
+     */
+    private fun enviarArquivosParaJavaScript(webView: WebView, arquivosJson: String) {
+        // Faz escape das aspas para evitar problemas no JavaScript
+        val jsonEscapado = arquivosJson.replace("'", "\\'")
+        webView.evaluateJavascript("receberArquivos('$jsonEscapado')", null)
+    }
+
+    /**
+     * Limpa o cache de arquivos.
+     */
+    fun limparCache() {
+        val arquivoCache = File(context.filesDir, CACHE_FILE_NAME)
+        if (arquivoCache.exists()) {
+            arquivoCache.delete()
+            Log.d(TAG, "Cache limpo com sucesso")
+        }
+    }
 }
