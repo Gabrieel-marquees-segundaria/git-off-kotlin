@@ -32,22 +32,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.g4br3.sitedentrodeapp.components.AppData
 import com.g4br3.sitedentrodeapp.components.FileManager
-import com.g4br3.sitedentrodeapp.components.JSLoader
-import com.g4br3.sitedentrodeapp.components.LoadExternalModelAsync
 import com.g4br3.sitedentrodeapp.components.UriList
 import com.g4br3.sitedentrodeapp.components.modulos
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-/**
- * Dados para representar uma função da WebAppInterface
- */
-data class WebAppFunction(
-    val name: String,
-    val description: String,
-    val parameters: String = "",
-    val returnType: String = "void"
-)
 
 /**
  * Atividade principal da aplicação.
@@ -66,9 +57,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var openDirectoryLauncher: androidx.activity.result.ActivityResultLauncher<Uri?>
     private lateinit var openFileLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>
     private var theOpenLaucherCallback: ((Uri) -> Unit)? = null
-
-
-    private lateinit var appDataModule: String//AppData
+    private lateinit var appDataModule: String
     /**
      * Método chamado quando a atividade é criada.
      *
@@ -76,24 +65,11 @@ class MainActivity : ComponentActivity() {
      * e configura o conteúdo da UI.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Instalar o splash screen
-
         super.onCreate(savedInstanceState)
-//        @Suppress("DEPRECATION")
-//        appDataModule=
-//            intent.getParcelableExtra<AppData>(modulos) as AppData
-//        println(appDataModule.toString().take(200))
         appDataModule = getSharedPreferences("prefs", Context.MODE_PRIVATE)
             .getString(intent.getStringExtra(modulos).toString(), "console.log('modulo nao encontrado')")
             .toString()
-        //Thread.sleep(3000)
-        val splashScreen = installSplashScreen()
-        // Opcional: manter o splash screen por mais tempo
-//        splashScreen.setKeepOnScreenCondition {
-//            // Retorne true para manter na tela
-//            false
-//        }
-
+        installSplashScreen()
         println("🚀 MainActivity: Iniciando onCreate()")
         Log.i(TAG, "MainActivity onCreate() iniciado")
         fileManager = FileManager(this)
@@ -103,21 +79,15 @@ class MainActivity : ComponentActivity() {
         val uriSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
             .getString(uriList.html.key, null)
         uriList.html.uri = uriStatus(uriSalva) { uri ->
-            carregarArquivoHtml(uri)
+            CoroutineScope(Dispatchers.Default).launch {
+                carregarArquivoHtml(uri)
+            }
         }
 
         val uriPathSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
             .getString(uriList.repository.key, null)
         println("uriPathSalva: $uriPathSalva")
-        println("webview  $webViewRef")
         uriList.repository.uri = uriStatus(uriPathSalva)
-        val moduleUriSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-            .getString(uriList.externalModulejs.key, null)
-        uriList.externalModulejs.uri = uriStatus(moduleUriSalva)
-        //loadExternalModel = LoadExternalModel(fileManager,uriList.externalModulejs.uri)
-        Log.d(TAG, "modulo js externo carregado com sucesso")
-
-        // Registra o launcher SAF para seleção de pasta
         println("📋 MainActivity: Registrando launcher para seleção de pasta")
 
         openDirectoryLauncher =
@@ -141,8 +111,6 @@ class MainActivity : ComponentActivity() {
                     Log.w(TAG, "Nenhuma pasta selecionada pelo usuário")
                     Toast.makeText(this, "Nenhuma pasta selecionada", Toast.LENGTH_SHORT).show()
                 }
-
-                // loadExternalModel = LoadExternalModel(fileManager,uriList.externalModulejs.uri)
                 Log.d(TAG, "modulo js externo carregado com sucesso")
             }
 
@@ -173,16 +141,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainScreen()
         }
-
         println("✅ MainActivity: onCreate() concluído com sucesso")
         Log.i(TAG, "MainActivity onCreate() concluído")
-        @Suppress("DEPRECATION")
-        val appData = intent.getParcelableExtra<AppData>("FILE_DATA") // anterior a api 33
-
-        //val appData = intent.getParcelableExtra("FILE_DATA", AppData::class.java ) // api 33+
-        println(appData)
+//        @Suppress("DEPRECATION")
+//        val appData = intent.getParcelableExtra<AppData>("FILE_DATA")
+//        println(appData)
     }
-
     /**
      * Carrega o conteúdo de um arquivo HTML selecionado.
      *
@@ -195,7 +159,6 @@ class MainActivity : ComponentActivity() {
         htmlContent = fileManager.Content
         isHtmlLoaded = fileManager.isLoaded
     }
-
     /**
      * Tela principal que gerencia a seleção de arquivo HTML e exibição do WebView.
      */
@@ -225,7 +188,9 @@ class MainActivity : ComponentActivity() {
                         selectFileSAF(uriList.html.key, { uri ->
                             uriList.html.uri = uri
                             // Carrega o conteúdo do arquivo HTML
-                            carregarArquivoHtml(uri)
+                            CoroutineScope(Dispatchers.Default).launch {
+                                carregarArquivoHtml(uri)
+                            }
                         }, "text/html")
                     },
                     modifier = Modifier.padding(16.dp)
@@ -256,11 +221,13 @@ class MainActivity : ComponentActivity() {
                                 // Lista arquivos da pasta selecionada
                                 webViewRef?.let {
                                     println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
-                                    fileManager.listarArquivosDasPastas(uri, it, true)
-                                    getSharedPreferences("prefs", Context.MODE_PRIVATE)
-                                        .edit()
-                                        .putString("path_uri", uri.toString())
-                                        .apply()
+                                    CoroutineScope(Dispatchers.Default).launch {
+                                        fileManager.listarArquivosDasPastas(uri, it, true)
+                                        getSharedPreferences("prefs", Context.MODE_PRIVATE)
+                                            .edit()
+                                            .putString("path_uri", uri.toString())
+                                            .apply()
+                                    }
 
                                 }
 
@@ -282,7 +249,6 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     @Composable
     private fun WebViewContainer(htmlContent: String, abrirPastaCallback: () -> Unit) {
-        println("🌐 WebViewContainer: Iniciando composable WebViewContainer")
         Log.d("WebViewContainer", "WebViewContainer composable iniciado")
 
         var webview: WebView? by remember { mutableStateOf(null) }
@@ -321,17 +287,14 @@ class MainActivity : ComponentActivity() {
                             Log.d("WebViewContainer", "Página iniciada: $url")
                             backButton = view?.canGoBack() ?: false
                         }
-
                         override fun onPageFinished(view: WebView?, url: String?) {
                             println("✅ WebViewContainer: Página carregada: $url")
                             Log.d("WebViewContainer", "Página carregada: $url")
                             loadJS()
                         }
                     }
-
                     println("📄 WebViewContainer: Carregando conteúdo HTML")
                     loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
-
                 }
             },
             update = {
@@ -340,46 +303,30 @@ class MainActivity : ComponentActivity() {
                 webViewRef = it
             }
         )
-
         BackHandler(enabled = backButton) {
             println("◀️ WebViewContainer: Botão voltar pressionado")
             webview?.goBack()
         }
-
         println("🏁 WebViewContainer: Composable WebViewContainer finalizado")
     }
-
     private fun homeWebSite() {
         uriList.repository.uri?.let {
             webViewRef?.let { webView ->
-
                 fileManager.listarArquivosDasPastas(it, webView)
             }
         }
     }
-
     private fun loadJS() {
-        //jsLoader = JSLoader(this)
-     // jsLoader.JsJuncao()
-        val code: String = appDataModule.toString()
-
+        val code: String = appDataModule
             webViewRef?.let { webView ->
             println("item da lista de javascript scripts: ${code.take(20)}")
             webView.post {
                 webView.evaluateJavascript(code, null)
-                // webView.evaluateJavascript(loadExternalModel.stringBuilder.toString(), null)
             }
-            //    loadExternalModel.inject(webView)
         }
-
     }
-
     private fun interfaceJSupdate() {
         interfaceJS.selectedFolderUri = uriList.repository.uri
-//       webViewRef?.let{
-//           loadExternalModel.inject(it)
-//       }
-
     }
 
     private fun selectFileSAF(
@@ -391,11 +338,9 @@ class MainActivity : ComponentActivity() {
             if (name != null) {
                 saveString(name, uri.toString())
             }
-
             on_selected.invoke(uri)
         }
         this.openFileLauncher.launch(arrayOf(mimeType, "*/*"))
-
     }
 
     private fun selectFolderURI(name: String, on_selected: (Uri) -> Unit) {
@@ -407,8 +352,6 @@ class MainActivity : ComponentActivity() {
             on_selected.invoke(uri)
         }
         this.openDirectoryLauncher.launch(null)
-
-
     }
 
     private fun saveString(name: String, value: String) {
