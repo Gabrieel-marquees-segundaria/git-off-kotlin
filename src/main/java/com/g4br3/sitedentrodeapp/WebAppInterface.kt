@@ -13,10 +13,10 @@ import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
 import com.g4br3.sitedentrodeapp.components.Info
 
-import com.g4br3.sitedentrodeapp.components.UriSaveList
+import com.g4br3.sitedentrodeapp.components.UriList
 import org.json.JSONObject
 
-var uriSaveList: UriSaveList = UriSaveList()
+var uriList: UriList = UriList()
 /**
  * Interface entre o JavaScript da WebView e o código nativo Android.
  * Permite executar funções Kotlin diretamente do JavaScript.
@@ -150,7 +150,7 @@ class WebAppInterface(
     @JavascriptInterface
     fun setExternModels(){
         Log.i(TAG, "selecionando modulo externo")
-        abrirPasrtasCallback(uriSaveList.externalModulejs.key){
+        abrirPasrtasCallback(uriList.externalModulejs.key){
             Log.i(TAG, " modulo externo selected")
         }
 

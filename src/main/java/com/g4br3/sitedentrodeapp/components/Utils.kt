@@ -8,9 +8,11 @@ class UriSave (name: String) {
 
 }
 
-class UriSaveList(){
+class UriList(){
     var html: UriSave = UriSave("**html**")
     var repository: UriSave = UriSave("repository")
     var externalModulejs: UriSave = UriSave("externalModulejs")
     var externalModuleCss: UriSave = UriSave("externalModuleCss")
 }
+
+var modulos = "MODULOS"

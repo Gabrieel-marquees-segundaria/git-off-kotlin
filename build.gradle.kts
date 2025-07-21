@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

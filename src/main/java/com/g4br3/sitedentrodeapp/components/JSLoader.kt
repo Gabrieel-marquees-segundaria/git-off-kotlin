@@ -4,7 +4,7 @@ import kotlin.collections.listOf
 
 
 class JSLoader(private val context: Context)  {
-    val jsList: List<String>
+    lateinit var jsList: List<String>
 
     var paths: List<String> = listOf<String>(
         "android",
@@ -12,7 +12,7 @@ class JSLoader(private val context: Context)  {
         "settings",
         "modulos"
     )
-    init {
+    fun jsListString() {
         val listaFinal = mutableListOf<String>()
         var assetTextReader: AssetTextReader = AssetTextReader(context)
         this.paths.forEach { name ->
@@ -22,7 +22,7 @@ class JSLoader(private val context: Context)  {
             }
 
         }
-        jsList = listaFinal
+        this.jsList = listaFinal
     }
 
 fun JsJuncao(): String{

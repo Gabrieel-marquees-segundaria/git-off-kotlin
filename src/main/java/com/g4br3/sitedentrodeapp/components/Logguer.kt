@@ -4,10 +4,10 @@ import android.util.Log
 
 class Logguer(
     tag: String,
-    callbackLog: (message) -> Unit
+    callbackLog: (message: String) -> Unit
 
 ) {
-    annotation class message
+
     var TAG = tag
 
     public fun info(TAG: String=this.TAG,     message:String){

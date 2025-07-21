@@ -13,20 +13,32 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.g4br3.sitedentrodeapp.components.AppData
 import com.g4br3.sitedentrodeapp.components.FileManager
 import com.g4br3.sitedentrodeapp.components.JSLoader
-import com.g4br3.sitedentrodeapp.components.UriSaveList
-import com.g4br3.sitedentrodeapp.components.LoadExternalModel
+import com.g4br3.sitedentrodeapp.components.LoadExternalModelAsync
+import com.g4br3.sitedentrodeapp.components.UriList
+import com.g4br3.sitedentrodeapp.components.modulos
+
 /**
  * Dados para representar uma função da WebAppInterface
  */
@@ -36,6 +48,7 @@ data class WebAppFunction(
     val parameters: String = "",
     val returnType: String = "void"
 )
+
 /**
  * Atividade principal da aplicação.
  *
@@ -45,19 +58,17 @@ data class WebAppFunction(
 class MainActivity : ComponentActivity() {
     private lateinit var interfaceJS: WebAppInterface
     private lateinit var fileManager: FileManager
-    private lateinit var jsLoader: JSLoader
     private val TAG = "MainActivity"
-    private var selectedFolderUri: Uri? = null
-    private var selectedHtmlUri by mutableStateOf<Uri?>(null)
     private var webViewRef: WebView? = null
-    private var uriSaveList: UriSaveList = UriSaveList()
+    private var uriList: UriList = UriList()
     private var htmlContent by mutableStateOf<String?>(null)
     private var isHtmlLoaded by mutableStateOf(false)
-    private var weblistName = "123weblistname123"
     private lateinit var openDirectoryLauncher: androidx.activity.result.ActivityResultLauncher<Uri?>
     private lateinit var openFileLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>
-    private var theOpenLaucherCallback:( (Uri) -> Unit)? = null
-    private lateinit var loadExternalModel: LoadExternalModel
+    private var theOpenLaucherCallback: ((Uri) -> Unit)? = null
+
+
+    private lateinit var appDataModule: String//AppData
     /**
      * Método chamado quando a atividade é criada.
      *
@@ -68,8 +79,14 @@ class MainActivity : ComponentActivity() {
         // Instalar o splash screen
 
         super.onCreate(savedInstanceState)
-
-        Thread.sleep(3000)
+//        @Suppress("DEPRECATION")
+//        appDataModule=
+//            intent.getParcelableExtra<AppData>(modulos) as AppData
+//        println(appDataModule.toString().take(200))
+        appDataModule = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+            .getString(intent.getStringExtra(modulos).toString(), "console.log('modulo nao encontrado')")
+            .toString()
+        //Thread.sleep(3000)
         val splashScreen = installSplashScreen()
         // Opcional: manter o splash screen por mais tempo
 //        splashScreen.setKeepOnScreenCondition {
@@ -84,27 +101,28 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         val uriSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-            .getString(uriSaveList.html.key, null)
-        uriSaveList.html.uri = uriStatus(uriSalva){uri->
+            .getString(uriList.html.key, null)
+        uriList.html.uri = uriStatus(uriSalva) { uri ->
             carregarArquivoHtml(uri)
         }
 
-        var uriPathSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-            .getString(uriSaveList.repository.key, null)
+        val uriPathSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+            .getString(uriList.repository.key, null)
         println("uriPathSalva: $uriPathSalva")
         println("webview  $webViewRef")
-        uriSaveList.repository.uri= uriStatus(uriPathSalva)
+        uriList.repository.uri = uriStatus(uriPathSalva)
         val moduleUriSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-            .getString(uriSaveList.externalModulejs.key, null)
-        uriSaveList.externalModulejs.uri = uriStatus(moduleUriSalva)
-        loadExternalModel = LoadExternalModel(fileManager,uriSaveList.externalModulejs.uri)
+            .getString(uriList.externalModulejs.key, null)
+        uriList.externalModulejs.uri = uriStatus(moduleUriSalva)
+        //loadExternalModel = LoadExternalModel(fileManager,uriList.externalModulejs.uri)
         Log.d(TAG, "modulo js externo carregado com sucesso")
 
         // Registra o launcher SAF para seleção de pasta
         println("📋 MainActivity: Registrando launcher para seleção de pasta")
 
-        openDirectoryLauncher = this.registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
-            println("📂 MainActivity: Resultado do seletor de pasta recebido")
+        openDirectoryLauncher =
+            this.registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+                println("📂 MainActivity: Resultado do seletor de pasta recebido")
 
                 if (uri != null) {
                     println("✅ MainActivity: Pasta selecionada: $uri")
@@ -124,31 +142,32 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this, "Nenhuma pasta selecionada", Toast.LENGTH_SHORT).show()
                 }
 
-            loadExternalModel = LoadExternalModel(fileManager,uriSaveList.externalModulejs.uri)
-            Log.d(TAG, "modulo js externo carregado com sucesso")
-        }
+                // loadExternalModel = LoadExternalModel(fileManager,uriList.externalModulejs.uri)
+                Log.d(TAG, "modulo js externo carregado com sucesso")
+            }
 
 
         // Registra o launcher SAF para seleção de arquivo HTML
         println("📄 MainActivity: Registrando launcher para seleção de arquivo")
-        openFileLauncher = this.registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-            println("📄 MainActivity: Resultado do seletor de arquivo HTML recebido")
+        openFileLauncher =
+            this.registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+                println("📄 MainActivity: Resultado do seletor de arquivo HTML recebido")
 
-            if (uri != null) {
-                println("✅ MainActivity: Arquivo  selecionado: $uri")
-                Log.i(TAG, "Arquivo  selecionado: $uri")
+                if (uri != null) {
+                    println("✅ MainActivity: Arquivo  selecionado: $uri")
+                    Log.i(TAG, "Arquivo  selecionado: $uri")
 
-                contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                theOpenLaucherCallback?.invoke(uri)
-            } else {
-                println("❌ MainActivity: Nenhum arquivo  foi selecionado")
-                Log.w(TAG, "Nenhum arquivo  selecionado pelo usuário")
-                Toast.makeText(this, "Nenhum arquivo  selecionado", Toast.LENGTH_SHORT).show()
+                    contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    theOpenLaucherCallback?.invoke(uri)
+                } else {
+                    println("❌ MainActivity: Nenhum arquivo  foi selecionado")
+                    Log.w(TAG, "Nenhum arquivo  selecionado pelo usuário")
+                    Toast.makeText(this, "Nenhum arquivo  selecionado", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
 
         println("🎨 MainActivity: Configurando conteúdo da UI")
         setContent {
@@ -157,7 +176,11 @@ class MainActivity : ComponentActivity() {
 
         println("✅ MainActivity: onCreate() concluído com sucesso")
         Log.i(TAG, "MainActivity onCreate() concluído")
+        @Suppress("DEPRECATION")
+        val appData = intent.getParcelableExtra<AppData>("FILE_DATA") // anterior a api 33
 
+        //val appData = intent.getParcelableExtra("FILE_DATA", AppData::class.java ) // api 33+
+        println(appData)
     }
 
     /**
@@ -168,7 +191,7 @@ class MainActivity : ComponentActivity() {
     private fun carregarArquivoHtml(uri: Uri) {
         println("📖 MainActivity: Iniciando carregamento do arquivo HTML")
         Log.d(TAG, "carregarArquivoHtml() iniciado para URI: $uri")
-        fileManager.carregarArquivo(uri,"text/html")
+        fileManager.carregarArquivo(uri, "text/html")
         htmlContent = fileManager.Content
         isHtmlLoaded = fileManager.isLoaded
     }
@@ -199,20 +222,20 @@ class MainActivity : ComponentActivity() {
                 Button(
                     onClick = {
                         println("🎯 MainScreen: Botão de seleção de HTML clicado")
-                        selectFileSAF(uriSaveList.html.key,{ uri ->
-                            uriSaveList.html.uri = uri
+                        selectFileSAF(uriList.html.key, { uri ->
+                            uriList.html.uri = uri
                             // Carrega o conteúdo do arquivo HTML
                             carregarArquivoHtml(uri)
-                        },"text/html")
+                        }, "text/html")
                     },
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text("Selecionar Arquivo HTML")
                 }
 
-                if (uriSaveList.html.uri != null) {
+                if (uriList.html.uri != null) {
                     Text(
-                        text = "Arquivo selecionado: ${uriSaveList.html.uri?.lastPathSegment}",
+                        text = "Arquivo selecionado: ${uriList.html.uri?.lastPathSegment}",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -228,20 +251,20 @@ class MainActivity : ComponentActivity() {
                             println("📁 MainScreen: Callback para abrir pasta acionado")
                             //openDirectoryLauncher.launch(null)
 
-                            selectFolderURI(uriSaveList.repository.key){uri ->
-                                uriSaveList.repository.uri = uri
+                            selectFolderURI(uriList.repository.key) { uri ->
+                                uriList.repository.uri = uri
                                 // Lista arquivos da pasta selecionada
-                    webViewRef?.let {
-                        println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
-                        fileManager.listarArquivosDasPastas(uri, it, true)
-                        getSharedPreferences("prefs", Context.MODE_PRIVATE)
-                            .edit()
-                            .putString("path_uri", uri.toString())
-                            .apply()
+                                webViewRef?.let {
+                                    println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
+                                    fileManager.listarArquivosDasPastas(uri, it, true)
+                                    getSharedPreferences("prefs", Context.MODE_PRIVATE)
+                                        .edit()
+                                        .putString("path_uri", uri.toString())
+                                        .apply()
 
-                    }
+                                }
 
-                    interfaceJSupdate()
+                                interfaceJSupdate()
                             }
                         }
                     )
@@ -280,12 +303,13 @@ class MainActivity : ComponentActivity() {
                     settings.allowContentAccess = true
 
                     println("🔌 WebViewContainer: Adicionando interface JavaScript")
-                     interfaceJS = WebAppInterface(ctx,
+                    interfaceJS = WebAppInterface(
+                        ctx,
                         this,
                         abrirPastaCallback,
-                         fun(name: String, on_selected: (Uri) -> Unit) {
-                             selectFolderURI(name, on_selected)
-                         },
+                        fun(name: String, on_selected: (Uri) -> Unit) {
+                            selectFolderURI(name, on_selected)
+                        },
                         { homeWebSite() })
 
                     addJavascriptInterface(interfaceJS, "Android")
@@ -324,37 +348,46 @@ class MainActivity : ComponentActivity() {
 
         println("🏁 WebViewContainer: Composable WebViewContainer finalizado")
     }
-    private fun homeWebSite(){
-        uriSaveList.repository.uri?.let {
+
+    private fun homeWebSite() {
+        uriList.repository.uri?.let {
             webViewRef?.let { webView ->
 
-                fileManager.listarArquivosDasPastas(it,webView)
+                fileManager.listarArquivosDasPastas(it, webView)
             }
         }
     }
-    private fun loadJS(){
-        jsLoader = JSLoader(this)
-        val code: String = jsLoader.JsJuncao()
-        webViewRef?.let { webView ->
-                println("item da lista de javascript scripts: ${code.take(20)}")
-                webView.post {
-                    webView.evaluateJavascript(code, null)
-                   // webView.evaluateJavascript(loadExternalModel.stringBuilder.toString(), null)
-                }
-            loadExternalModel.inject(webView)
+
+    private fun loadJS() {
+        //jsLoader = JSLoader(this)
+     // jsLoader.JsJuncao()
+        val code: String = appDataModule.toString()
+
+            webViewRef?.let { webView ->
+            println("item da lista de javascript scripts: ${code.take(20)}")
+            webView.post {
+                webView.evaluateJavascript(code, null)
+                // webView.evaluateJavascript(loadExternalModel.stringBuilder.toString(), null)
             }
-
-    }
-   private fun interfaceJSupdate(){
-       interfaceJS.selectedFolderUri = uriSaveList.repository.uri
-       webViewRef?.let{
-           loadExternalModel.inject(it)
-       }
+            //    loadExternalModel.inject(webView)
+        }
 
     }
 
-    private fun selectFileSAF(name: String?, on_selected: (Uri) -> Unit, mimeType: String ="text/html"){
-        theOpenLaucherCallback = {uri ->
+    private fun interfaceJSupdate() {
+        interfaceJS.selectedFolderUri = uriList.repository.uri
+//       webViewRef?.let{
+//           loadExternalModel.inject(it)
+//       }
+
+    }
+
+    private fun selectFileSAF(
+        name: String?,
+        on_selected: (Uri) -> Unit,
+        mimeType: String = "text/html"
+    ) {
+        theOpenLaucherCallback = { uri ->
             if (name != null) {
                 saveString(name, uri.toString())
             }
@@ -364,26 +397,29 @@ class MainActivity : ComponentActivity() {
         this.openFileLauncher.launch(arrayOf(mimeType, "*/*"))
 
     }
-    private fun selectFolderURI(name: String, on_selected: (Uri) -> Unit){
-        theOpenLaucherCallback = {uri ->
+
+    private fun selectFolderURI(name: String, on_selected: (Uri) -> Unit) {
+        theOpenLaucherCallback = { uri ->
             if (name != null) {
-            saveString(name, uri.toString())
+                saveString(name, uri.toString())
             }
 
             on_selected.invoke(uri)
         }
-       this.openDirectoryLauncher.launch(null)
+        this.openDirectoryLauncher.launch(null)
 
 
     }
-    private fun saveString(name: String, value: String){
+
+    private fun saveString(name: String, value: String) {
         // ⬇️ SALVA O URI NO SharedPreferences
         getSharedPreferences("prefs", Context.MODE_PRIVATE)
             .edit()
             .putString(name, value)
             .apply()
     }
-    fun uriStatus(uriString: String?,callback: ((uri:Uri)-> Unit)?=null): Uri? {
+
+    fun uriStatus(uriString: String?, callback: ((uri: Uri) -> Unit)? = null): Uri? {
         if (uriString != null) {
             Log.i(TAG, "onCreate: 'uriSalva' NÃO é nulo, tentando parsear.")
             try {
@@ -401,11 +437,15 @@ class MainActivity : ComponentActivity() {
             } catch (e: Exception) {
                 // Se for uma NullPointerException aqui, o catch genérico pode pegá-la.
                 // Verifique se 'e' é uma NullPointerException.
-                Log.e(TAG, "Erro ao restaurar URI salva: Tipo=${e::class.java.simpleName}, Msg=${e.message}", e)
+                Log.e(
+                    TAG,
+                    "Erro ao restaurar URI salva: Tipo=${e::class.java.simpleName}, Msg=${e.message}",
+                    e
+                )
             }
         } else {
             Log.i(TAG, "onCreate: 'uriSalva' é nulo, pulando o bloco de restauração.")
         }
-return null
+        return null
     }
 }
