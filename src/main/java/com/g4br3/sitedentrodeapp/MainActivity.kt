@@ -35,6 +35,10 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.g4br3.sitedentrodeapp.components.FileManager
 import com.g4br3.sitedentrodeapp.components.UriList
 import com.g4br3.sitedentrodeapp.components.modulos
+import com.g4br3.sitedentrodeapp.dataBase.AppDatabase
+import com.g4br3.sitedentrodeapp.dataBase.Banco
+import com.g4br3.sitedentrodeapp.dataBase.Path
+import com.g4br3.sitedentrodeapp.dataBase.PathDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,6 +62,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var openFileLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>
     private var theOpenLaucherCallback: ((Uri) -> Unit)? = null
     private lateinit var appDataModule: String
+    private lateinit var db : AppDatabase
+    private lateinit var pathDao : PathDao
+
     /**
      * Método chamado quando a atividade é criada.
      *
@@ -67,13 +74,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         appDataModule = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-            .getString(intent.getStringExtra(modulos).toString(), "console.log('modulo nao encontrado')")
+            .getString(
+                intent.getStringExtra(modulos).toString(),
+                "console.log('modulo nao encontrado')"
+            )
             .toString()
         installSplashScreen()
         println("🚀 MainActivity: Iniciando onCreate()")
         Log.i(TAG, "MainActivity onCreate() iniciado")
         fileManager = FileManager(this)
-
+        db = Banco.get(this)
+        pathDao = db.pathDao()
 
         enableEdgeToEdge()
         val uriSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
@@ -147,6 +158,7 @@ class MainActivity : ComponentActivity() {
 //        val appData = intent.getParcelableExtra<AppData>("FILE_DATA")
 //        println(appData)
     }
+
     /**
      * Carrega o conteúdo de um arquivo HTML selecionado.
      *
@@ -159,6 +171,7 @@ class MainActivity : ComponentActivity() {
         htmlContent = fileManager.Content
         isHtmlLoaded = fileManager.isLoaded
     }
+
     /**
      * Tela principal que gerencia a seleção de arquivo HTML e exibição do WebView.
      */
@@ -222,7 +235,9 @@ class MainActivity : ComponentActivity() {
                                 webViewRef?.let {
                                     println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
                                     CoroutineScope(Dispatchers.Default).launch {
-                                        fileManager.listarArquivosDasPastas(uri, it, true)
+                                        fileManager.listarArquivosDasPastas(uri, it, true){ file, type->
+                                            pathDao.inserir(Path(stringUri = file.uri, name = file.name, type))
+                                        }
                                         getSharedPreferences("prefs", Context.MODE_PRIVATE)
                                             .edit()
                                             .putString("path_uri", uri.toString())
@@ -287,6 +302,7 @@ class MainActivity : ComponentActivity() {
                             Log.d("WebViewContainer", "Página iniciada: $url")
                             backButton = view?.canGoBack() ?: false
                         }
+
                         override fun onPageFinished(view: WebView?, url: String?) {
                             println("✅ WebViewContainer: Página carregada: $url")
                             Log.d("WebViewContainer", "Página carregada: $url")
@@ -309,22 +325,28 @@ class MainActivity : ComponentActivity() {
         }
         println("🏁 WebViewContainer: Composable WebViewContainer finalizado")
     }
+
     private fun homeWebSite() {
         uriList.repository.uri?.let {
             webViewRef?.let { webView ->
-                fileManager.listarArquivosDasPastas(it, webView)
+                fileManager.listarArquivosDasPastas(it, webView){
+
+                }
             }
         }
     }
+
+    @SuppressLint("SuspiciousIndentation")
     private fun loadJS() {
         val code: String = appDataModule
-            webViewRef?.let { webView ->
+        webViewRef?.let { webView ->
             println("item da lista de javascript scripts: ${code.take(20)}")
             webView.post {
                 webView.evaluateJavascript(code, null)
             }
         }
     }
+
     private fun interfaceJSupdate() {
         interfaceJS.selectedFolderUri = uriList.repository.uri
     }

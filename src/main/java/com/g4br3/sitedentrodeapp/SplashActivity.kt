@@ -39,6 +39,7 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var jsLoader: JSLoader
     private lateinit var fileManager: FileManager
     private lateinit var externalModel: LoadExternalModel
+
     private val TAG = "SplashActivity"
     private var dataBasekey: String = ""
 
@@ -73,17 +74,6 @@ class SplashActivity : AppCompatActivity() {
 
                 }
                 sharedPrefs.edit().putString(dataBasekey, dataString).apply()
-
-//                Log.d(
-//                    TAG,
-//                    "URI loaded from SharedPreferences - Key: '${uriListS.repository.key}', Value: '$uriPathSalva'"
-//                )
-
-//                if (uriPathSalva.isNullOrEmpty()) {
-//                    Log.w(TAG, "No saved URI found or URI is empty")
-//                } else {
-//                    Log.i(TAG, "Successfully loaded saved URI: $uriPathSalva")
-//                }
 
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading URI from SharedPreferences", e)

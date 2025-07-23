@@ -2,13 +2,16 @@ package com.g4br3.sitedentrodeapp.components
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.webkit.WebView
+import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
 import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import kotlin.collections.MutableMap
 
 class FileManager(context: Context) {
     companion object {
@@ -53,6 +56,7 @@ class FileManager(context: Context) {
      * @param uri URI da pasta selecionada
      * @param webView Instância do WebView para executar JavaScript
      */
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun listarArquivosDaPasta(uri: Uri, webView: WebView) {
         Log.d(TAG, "listarArquivosDaPasta() iniciado para URI: $uri")
 
@@ -94,7 +98,8 @@ class FileManager(context: Context) {
     private fun percorrerPasta(
         pasta: DocumentFile?,
         caminhoAtual: String = "",
-        resultado: MutableList<String>
+        resultado: MutableList<String> , //<String>
+        callback: (DocumentFile, String) -> Unit
     ) {
         if (pasta != null && pasta.isDirectory) {
             for (arquivo in pasta.listFiles()) {
@@ -102,13 +107,25 @@ class FileManager(context: Context) {
                 val caminhoRelativo = if (caminhoAtual.isEmpty()) nome else "$caminhoAtual/$nome"
 
                 if (arquivo.isDirectory) {
-                    percorrerPasta(arquivo, caminhoRelativo, resultado)
+                   // var fileInfo: MutableMap<String, String> = mutableMapOf("name" to arquivo.name.toString(), "uri" to arquivo.uri.toString(), "relativePath" to caminhoRelativo)
+                   // resultado.add(caminhoRelativo)
+                    resultado.add(toFileInfo(arquivo,caminhoRelativo,"dir").toString())
+                    percorrerPasta(arquivo, caminhoRelativo, resultado, callback)
                 } else if (arquivo.isFile) {
-                    resultado.add(caminhoRelativo)
+                    resultado.add(toFileInfo(arquivo,caminhoRelativo,"file").toString())
                 }
             }
         }
     }
+    fun toFileInfo(arquivo: DocumentFile, caminhoRelativo: String, type: String): MutableMap<String, String> {
+      return  mutableMapOf(
+            "name" to arquivo.name.toString(),
+            "uri" to arquivo.uri.toString(),
+            "relativePath" to caminhoRelativo,
+            "type" to type
+      )
+    }
+    private fun mutableMapOf(pairs: Pair<String, String>) {}
 
     /**
      * Lista todos os arquivos da pasta selecionada (inclusive subpastas) e envia ao JavaScript.
@@ -117,7 +134,13 @@ class FileManager(context: Context) {
      * @param webView Instância da WebView para comunicação com JavaScript
      * @param forceRefresh Se true, força a atualização do cache
      */
-    fun listarArquivosDasPastas(uri: Uri?, webView: WebView, forceRefresh: Boolean = false) {
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun listarArquivosDasPastas(
+        uri: Uri?,
+        webView: WebView,
+        forceRefresh: Boolean = false,
+        callback: (file: DocumentFile, type: String) -> Unit
+    ) {
         if (uri == null) {
             Log.w(TAG, "URI é null")
             enviarArquivosParaJavaScript(webView, "[]")
@@ -138,7 +161,7 @@ class FileManager(context: Context) {
             val docFile = DocumentFile.fromTreeUri(context, uri)
             val nomesArquivos = mutableListOf<String>()
 
-            percorrerPasta(docFile, "", nomesArquivos)
+            percorrerPasta(docFile, "", nomesArquivos, callback)
 
             val arquivosJson = JSONArray(nomesArquivos).toString()
 
@@ -160,11 +183,15 @@ class FileManager(context: Context) {
      * @param webView Instância do WebView
      * @param arquivosJson JSON com a lista de arquivos
      */
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     private fun enviarArquivosParaJavaScript(webView: WebView, arquivosJson: String) {
         // Faz escape das aspas para evitar problemas no JavaScript
         val jsonEscapado = arquivosJson.replace("'", "\\'")
+    webView.post {
         webView.evaluateJavascript("receberArquivos('$jsonEscapado')", null)
+
     }
+          }
 
     /**
      * Limpa o cache de arquivos.
