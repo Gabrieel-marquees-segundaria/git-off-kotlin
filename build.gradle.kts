@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
 }
 
 android {
@@ -42,6 +43,7 @@ android {
 dependencies {
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -75,7 +77,13 @@ dependencies {
 
         // If this project only uses Java source, use the Java annotationProcessor
         // No additional plugins are necessary
-        annotationProcessor("androidx.room:room-compiler:$room_version")
+
+
+
+    kapt("androidx.room:room-compiler:$room_version")
+
+    implementation("androidx.room:room-ktx:$room_version")
+
 
         // optional - Kotlin Extensions and Coroutines support for Room
         implementation("androidx.room:room-ktx:$room_version")

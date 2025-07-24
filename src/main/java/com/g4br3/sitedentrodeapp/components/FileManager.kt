@@ -93,28 +93,24 @@ class FileManager(context: Context) {
      *
      * @param pasta DocumentFile da pasta atual
      * @param caminhoAtual Caminho relativo atual (usado para construir hierarquia)
-     * @param resultado Lista para armazenar os caminhos dos arquivos
+
      */
     private fun percorrerPasta(
         pasta: DocumentFile?,
         caminhoAtual: String = "",
-        resultado: MutableList<String> , //<String>
-        callback: (DocumentFile, String) -> Unit
+
+        callback: (DocumentFile?, String?) -> Unit
     ) {
-        if (pasta != null && pasta.isDirectory) {
+        if (pasta == null || !pasta.isDirectory) return
+
+            callback(null,null)
             for (arquivo in pasta.listFiles()) {
                 val nome = arquivo.name ?: continue
                 val caminhoRelativo = if (caminhoAtual.isEmpty()) nome else "$caminhoAtual/$nome"
-
+                callback(arquivo, arquivo.type)
                 if (arquivo.isDirectory) {
-                   // var fileInfo: MutableMap<String, String> = mutableMapOf("name" to arquivo.name.toString(), "uri" to arquivo.uri.toString(), "relativePath" to caminhoRelativo)
-                   // resultado.add(caminhoRelativo)
-                    resultado.add(toFileInfo(arquivo,caminhoRelativo,"dir").toString())
-                    percorrerPasta(arquivo, caminhoRelativo, resultado, callback)
-                } else if (arquivo.isFile) {
-                    resultado.add(toFileInfo(arquivo,caminhoRelativo,"file").toString())
+                    percorrerPasta(arquivo, caminhoRelativo, callback)
                 }
-            }
         }
     }
     fun toFileInfo(arquivo: DocumentFile, caminhoRelativo: String, type: String): MutableMap<String, String> {
@@ -161,7 +157,7 @@ class FileManager(context: Context) {
             val docFile = DocumentFile.fromTreeUri(context, uri)
             val nomesArquivos = mutableListOf<String>()
 
-            percorrerPasta(docFile, "", nomesArquivos, callback)
+            percorrerPasta(docFile, "", callback as (DocumentFile?, String?) -> Unit)
 
             val arquivosJson = JSONArray(nomesArquivos).toString()
 

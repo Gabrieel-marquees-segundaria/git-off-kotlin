@@ -1,7 +1,6 @@
 package com.g4br3.sitedentrodeapp
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -14,6 +13,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.documentfile.provider.DocumentFile
 import com.g4br3.sitedentrodeapp.components.FileManager
 import com.g4br3.sitedentrodeapp.components.UriList
 import com.g4br3.sitedentrodeapp.components.modulos
@@ -42,6 +43,8 @@ import com.g4br3.sitedentrodeapp.dataBase.PathDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 
 
 /**
@@ -58,8 +61,8 @@ class MainActivity : ComponentActivity() {
     private var uriList: UriList = UriList()
     private var htmlContent by mutableStateOf<String?>(null)
     private var isHtmlLoaded by mutableStateOf(false)
-    private lateinit var openDirectoryLauncher: androidx.activity.result.ActivityResultLauncher<Uri?>
-    private lateinit var openFileLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>
+    private lateinit var openDirectoryLauncher: ActivityResultLauncher<Uri?>
+    private lateinit var openFileLauncher: ActivityResultLauncher<Array<String>>
     private var theOpenLaucherCallback: ((Uri) -> Unit)? = null
     private lateinit var appDataModule: String
     private lateinit var db : AppDatabase
@@ -73,7 +76,7 @@ class MainActivity : ComponentActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appDataModule = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        appDataModule = getSharedPreferences("prefs", MODE_PRIVATE)
             .getString(
                 intent.getStringExtra(modulos).toString(),
                 "console.log('modulo nao encontrado')"
@@ -87,7 +90,7 @@ class MainActivity : ComponentActivity() {
         pathDao = db.pathDao()
 
         enableEdgeToEdge()
-        val uriSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val uriSalva = getSharedPreferences("prefs", MODE_PRIVATE)
             .getString(uriList.html.key, null)
         uriList.html.uri = uriStatus(uriSalva) { uri ->
             CoroutineScope(Dispatchers.Default).launch {
@@ -95,7 +98,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val uriPathSalva = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val uriPathSalva = getSharedPreferences("prefs", MODE_PRIVATE)
             .getString(uriList.repository.key, null)
         println("uriPathSalva: $uriPathSalva")
         uriList.repository.uri = uriStatus(uriPathSalva)
@@ -235,10 +238,16 @@ class MainActivity : ComponentActivity() {
                                 webViewRef?.let {
                                     println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
                                     CoroutineScope(Dispatchers.Default).launch {
-                                        fileManager.listarArquivosDasPastas(uri, it, true){ file, type->
-                                            pathDao.inserir(Path(stringUri = file.uri, name = file.name, type))
+                                        fileManager.listarArquivosDasPastas(uri, it, true){file, type ->
+
+                                            insertFile(file,  if(type ==null) type else "dir")
                                         }
-                                        getSharedPreferences("prefs", Context.MODE_PRIVATE)
+                                        var list = pathDao.listar()
+                                       it.post {
+
+                                           it.evaluateJavascript("receberArquivos(${JSONArray(list)})", null)
+                                       }
+                                           getSharedPreferences("prefs", MODE_PRIVATE)
                                             .edit()
                                             .putString("path_uri", uri.toString())
                                             .apply()
@@ -329,8 +338,8 @@ class MainActivity : ComponentActivity() {
     private fun homeWebSite() {
         uriList.repository.uri?.let {
             webViewRef?.let { webView ->
-                fileManager.listarArquivosDasPastas(it, webView){
-
+                fileManager.listarArquivosDasPastas(it, webView,false){file, type ->
+                    insertFile(file, type)
                 }
             }
         }
@@ -378,7 +387,7 @@ class MainActivity : ComponentActivity() {
 
     private fun saveString(name: String, value: String) {
         // ⬇️ SALVA O URI NO SharedPreferences
-        getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        getSharedPreferences("prefs", MODE_PRIVATE)
             .edit()
             .putString(name, value)
             .apply()
@@ -413,4 +422,27 @@ class MainActivity : ComponentActivity() {
         }
         return null
     }
+    var level = 0
+    fun insertFile(file: DocumentFile?, type: String) {
+
+        if (file == null) {
+            level+= 1
+            return
+        }
+
+
+
+        // Melhor: usar escopo de viewModel, lifecycleScope, ou passar scope como argumento
+        CoroutineScope(Dispatchers.IO).launch {
+            pathDao.inserir(
+                Path(
+                    stringUri = file.uri.toString(),
+                    name = file.name,
+                    type = type,
+                    level = level
+                )
+            )
+        }
+    }
+
 }

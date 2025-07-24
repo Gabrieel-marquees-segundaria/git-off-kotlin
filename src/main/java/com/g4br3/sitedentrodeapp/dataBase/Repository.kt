@@ -21,10 +21,11 @@ import androidx.room.RoomDatabase
  *
  * */
 data class Path(
-    @PrimaryKey(autoGenerate = true) val uid: Int,
+    @PrimaryKey(autoGenerate = true) val uid: Int =0,
     @ColumnInfo(name = "string_uri") val stringUri: String?,
     @ColumnInfo(name = "name") val name: String?,
-    @ColumnInfo(name = "type") val type: String?
+    @ColumnInfo(name = "type") val type: String?,
+    @ColumnInfo(name = "level") val level: Int?
 )
 
 @Dao
@@ -32,6 +33,9 @@ interface PathDao {
     @Insert
     suspend fun inserir(path: Path)
     @Query("SELECT * FROM path") suspend fun listar(): List<Path>
+    @Query("SELECT * FROM path WHERE level LIKE :search") fun loadLevel(search: String?): List<Path>
+    @Query("SELECT * FROM path WHERE name LIKE :search") fun loadName(search: String?):  List<Path>
+    //search = "%fido%";
     @Delete
     suspend fun deletar(path: Path)
 }
