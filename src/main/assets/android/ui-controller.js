@@ -23,10 +23,11 @@ class UIController {
     }
 
     renderizarListaArquivos(arquivos) {
+
         let listaHtml = '<ul class="file-list">';
-        arquivos.forEach(nome => {
-            listaHtml += `<li class="file-item" onclick="lerArquivo('${nome}')" data-file="${nome}">
-                <span>${nome}</span>
+        arquivos.forEach(file => {
+            listaHtml += `<li class="file-item" onclick="getUriData('${file.uri}','${file.type}')" data-file="${file.id}">
+                <span>${file.name}</span>
             </li>`;
         });
         listaHtml += "</ul>";

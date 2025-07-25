@@ -98,16 +98,17 @@ class FileManager(context: Context) {
     private fun percorrerPasta(
         pasta: DocumentFile?,
         caminhoAtual: String = "",
-
-        callback: (DocumentFile?, String?) -> Unit
+        callback: (DocumentFile?, String?, father:String?) -> Unit
     ) {
         if (pasta == null || !pasta.isDirectory) return
 
-            callback(null,null)
+        callback(null,null, null)
             for (arquivo in pasta.listFiles()) {
+                Log.w(TAG, "arquivo:  ${arquivo.name}")
                 val nome = arquivo.name ?: continue
+                var father =arquivo.parentFile.uri.toString() //"${arquivo.parentFile.lastModified().toString()}"
                 val caminhoRelativo = if (caminhoAtual.isEmpty()) nome else "$caminhoAtual/$nome"
-                callback(arquivo, arquivo.type)
+                callback(arquivo, arquivo.type,father)//arquivo.parentFile.name.toString())
                 if (arquivo.isDirectory) {
                     percorrerPasta(arquivo, caminhoRelativo, callback)
                 }
@@ -135,7 +136,7 @@ class FileManager(context: Context) {
         uri: Uri?,
         webView: WebView,
         forceRefresh: Boolean = false,
-        callback: (file: DocumentFile, type: String) -> Unit
+        callback: (file: DocumentFile, type: String, father: String) -> Unit
     ) {
         if (uri == null) {
             Log.w(TAG, "URI é null")
@@ -157,15 +158,15 @@ class FileManager(context: Context) {
             val docFile = DocumentFile.fromTreeUri(context, uri)
             val nomesArquivos = mutableListOf<String>()
 
-            percorrerPasta(docFile, "", callback as (DocumentFile?, String?) -> Unit)
+            percorrerPasta(docFile, "", callback=callback as (DocumentFile?, String?, father: String?) -> Unit)
 
-            val arquivosJson = JSONArray(nomesArquivos).toString()
 
             // Salva no cache
-            arquivoCache.writeText(arquivosJson)
-
-            // Envia para o JavaScript
-            enviarArquivosParaJavaScript(webView, arquivosJson)
+            //arquivoCache.writeText(arquivosJson)
+//            val arquivosJson = JSONArray(nomesArquivos).toString()
+//
+//            // Envia para o JavaScript
+//            enviarArquivosParaJavaScript(webView, arquivosJson)
 
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao listar arquivos das pastas", e)

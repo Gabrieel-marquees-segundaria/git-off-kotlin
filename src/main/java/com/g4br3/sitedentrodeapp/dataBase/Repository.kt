@@ -9,8 +9,11 @@ import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 
 // Repository
 
@@ -22,10 +25,11 @@ import androidx.room.RoomDatabase
  * */
 data class Path(
     @PrimaryKey(autoGenerate = true) val uid: Int =0,
-    @ColumnInfo(name = "string_uri") val stringUri: String?,
+    @ColumnInfo(name = "stringUri") val stringUri: String?,
     @ColumnInfo(name = "name") val name: String?,
     @ColumnInfo(name = "type") val type: String?,
-    @ColumnInfo(name = "level") val level: Int?
+    @ColumnInfo(name = "level") val level: Int?,
+    @ColumnInfo(name = "father") val father: String?
 )
 
 @Dao
@@ -34,13 +38,28 @@ interface PathDao {
     suspend fun inserir(path: Path)
     @Query("SELECT * FROM path") suspend fun listar(): List<Path>
     @Query("SELECT * FROM path WHERE level LIKE :search") fun loadLevel(search: String?): List<Path>
-    @Query("SELECT * FROM path WHERE name LIKE :search") fun loadName(search: String?):  List<Path>
     //search = "%fido%";
+    @Query("SELECT * FROM path WHERE name LIKE :search")
+    fun searchByName(search: String): List<Path>
+
+    @Query("SELECT * FROM path WHERE type LIKE :search")
+    fun searchByType(search: String): List<Path>
+    @RawQuery
+    fun searchByRawQuery(query: SupportSQLiteQuery): List<Path>
+//    val query = SimpleSQLiteQuery("SELECT * FROM path WHERE $column LIKE ?", arrayOf("%$search%"))
+//    val result = pathDao.searchByRawQuery(query)
+
     @Delete
     suspend fun deletar(path: Path)
+    @Query("DELETE FROM Path")
+    suspend fun deletarTudo()
+
 }
 
-@Database(entities = [Path::class], version = 1)
+// val resultados = buscarPorColuna(pathDao, "type", "imagem")
+
+
+@Database(entities = [Path::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun pathDao(): PathDao
 }

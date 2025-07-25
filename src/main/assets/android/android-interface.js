@@ -7,7 +7,8 @@ class AndroidInterface {
     checkAndroidAvailability() {
         return window.Android &&
                typeof window.Android.abrirPasta === 'function' &&
-               typeof window.Android.lerArquivo === 'function' &&
+               //typeof window.Android.lerArquivo === 'function' &&
+                typeof window.Android.getUriData === 'function' &&
                typeof window.Android.listarArquivos === 'function';
     }
 
@@ -19,14 +20,20 @@ class AndroidInterface {
         return false;
     }
 
-    lerArquivo(nome) {
+    lerArquivo(uri) {
         if (this.isAndroidAvailable) {
-            window.Android.lerArquivo(nome);
+            window.Android.getUriData(uri);
             return true;
         }
         return false;
     }
-
+    getUriData(uri, type) {
+        if (this.isAndroidAvailable) {
+            window.Android.getUriData(uri, type);
+            return true;
+        }
+        return false;
+    }
     listarArquivos() {
         if (this.isAndroidAvailable) {
             window.Android.listarArquivos();

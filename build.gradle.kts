@@ -84,6 +84,7 @@ dependencies {
 
     implementation("androidx.room:room-ktx:$room_version")
 
+    implementation("com.google.code.gson:gson:2.10.1")
 
         // optional - Kotlin Extensions and Coroutines support for Room
         implementation("androidx.room:room-ktx:$room_version")

@@ -34,10 +34,12 @@ function listar_arquivos() {
     fileManager.listarArquivos();
 }
 
-function lerArquivo(nome) {
-    fileManager.lerArquivo(nome);
+function lerArquivo(uri) {
+    fileManager.lerArquivo(uri);
 }
-
+function getUriData(uri, type) {
+    fileManager.getUriData(uri, type);
+}
 function voltarParaLista() {
     fileManager.voltarParaLista();
 }

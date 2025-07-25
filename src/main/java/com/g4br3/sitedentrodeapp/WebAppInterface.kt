@@ -10,10 +10,16 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.net.toFile
 import androidx.documentfile.provider.DocumentFile
 import com.g4br3.sitedentrodeapp.components.Info
-
 import com.g4br3.sitedentrodeapp.components.UriList
+import com.g4br3.sitedentrodeapp.dataBase.AppDatabase
+import com.g4br3.sitedentrodeapp.dataBase.Banco
+import com.g4br3.sitedentrodeapp.dataBase.PathDao
+import com.g4br3.sitedentrodeapp.dataBase.buscarPorColuna
+import com.g4br3.sitedentrodeapp.dataBase.pathColumns
+import com.google.gson.Gson
 import org.json.JSONObject
 
 var uriList: UriList = UriList()
@@ -28,11 +34,14 @@ var uriList: UriList = UriList()
 class WebAppInterface(
     private val context: Context,
     private val webView: WebView,
+    private val pathDao: PathDao,
     private val abrirPastaCallback: () -> Unit,
     private val abrirPasrtasCallback: (name: String, on_selected: (Uri) -> Unit)-> Unit,
     val listarArquivos: (() -> Unit)?
+
 ) {
     private var info = Info(context)
+
     /** URI da pasta selecionada, atualizada pela MainActivity */
     var selectedFolderUri: Uri? = null
         set(value) {
@@ -58,27 +67,11 @@ class WebAppInterface(
         Log.d(TAG, "ListarArquivos: ${if (listarArquivos != null) "Configurado" else "Não configurado"}")
     }
 
-    @JavascriptInterface
-    fun abrirArquivo(name: String) {
-        Log.d(TAG, "📄 abrirArquivo chamado com parâmetro: '$name'")
-        // TODO: Implementar lógica
-        Log.w(TAG, "abrirArquivo não implementado - callback comentado")
-        //abrirArquivoCallback(name)
-    }
 
-    @JavascriptInterface
-    fun filesString() {
-        Log.d(TAG, "📋 filesString() chamado")
-        // TODO: Implementar lógica
-        Log.w(TAG, "filesString não implementado - código comentado")
-        //webView.evaluateJavascript("receberListaDeNomesHTML([${webFiles.webListName.value},${webFiles.webHtmlViewName.value}])", null)
-    }
 
-    @JavascriptInterface
-    fun set_home(file: String){
-        Log.d(TAG, "🏠 set_home chamado com parâmetro: '$file'")
-        println(file)
-    }
+
+
+
 
     /** Escapa string para ser segura dentro de JavaScript inline */
     private fun escaparParaJavascript(codigo: String): String {
@@ -115,18 +108,7 @@ class WebAppInterface(
         }
     }
 
-    /** Função chamada do JavaScript para solicitar um nome. */
-    @JavascriptInterface
-    fun pegarNome() {
-        Log.d(TAG, "👤 pegarNome() chamado")
-        Toast.makeText(context, "Android recebeu pedido de nome", Toast.LENGTH_SHORT).show()
-        val nome = "Gabriel"
-        Log.d(TAG, "Enviando nome '$nome' para JavaScript")
-        webView.post {
-            Log.d(TAG, "Executando JavaScript: receberNome('$nome')")
-            webView.evaluateJavascript("receberNome('$nome')", null)
-        }
-    }
+
 
     /**
      * Método JavaScript para abrir o seletor de pasta.
@@ -161,8 +143,49 @@ class WebAppInterface(
       return JSONObject(this.info.all).toString()
 
     }
-    /** Função chamada do JavaScript para ler o conteúdo de um arquivo da pasta. */
+
     @JavascriptInterface
+    fun getUriData(uriString: String, type: String){
+        println(type)
+        var uri: Uri = Uri.parse(uriString)
+        if (type == "dir"){
+            var result = buscarPorColuna(pathDao, pathColumns.father, uriString)
+            val list: List<Map<String, Any?>> = result.map { path ->
+
+                mapOf(
+                    "id" to path.uid,
+                    "uri" to path.stringUri,
+                    "name" to path.name,
+                    "type" to path.type,
+                    "level" to path.level,
+                    "father" to path.father
+                )
+            }
+            val listJson = Gson().toJson(list)
+                webView.post {
+                    println(listJson)
+                    webView.evaluateJavascript("receberArquivos(${listJson})", null)
+                }
+        }
+        else {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val conteudo = inputStream?.bufferedReader().use { it?.readText() } ?: "Erro ao ler arquivo"
+            val conteudoEscapado = conteudo
+                .replace("\\", "\\\\")
+                .replace("'", "\\'")
+                .replace("\n", "\\n")
+                .replace("\r", "")
+            Log.v(TAG, "Conteúdo escapado para JavaScript")
+            Log.d(TAG, "Conteúdo do arquivo lido: ${conteudo.length} caracteres")
+          webView.post {
+              Log.d(TAG, "Página carregada, executando mostrarConteudo imediatamente")
+              webView.evaluateJavascript("mostrarConteudo('$conteudoEscapado')", null)
+          }
+        }
+    }
+
+
+    /** Função chamada do JavaScript para ler o conteúdo de um arquivo da pasta. */
     fun lerArquivo(caminhoRelativo: String) {
         Log.i(TAG, "📖 lerArquivo chamado com caminho: '$caminhoRelativo'")
 

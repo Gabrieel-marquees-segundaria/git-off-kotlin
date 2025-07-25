@@ -40,11 +40,12 @@ import com.g4br3.sitedentrodeapp.dataBase.AppDatabase
 import com.g4br3.sitedentrodeapp.dataBase.Banco
 import com.g4br3.sitedentrodeapp.dataBase.Path
 import com.g4br3.sitedentrodeapp.dataBase.PathDao
+import com.g4br3.sitedentrodeapp.dataBase.buscarPorColuna
+import com.g4br3.sitedentrodeapp.dataBase.pathColumns
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
+import com.google.gson.Gson
 
 
 /**
@@ -237,16 +238,26 @@ class MainActivity : ComponentActivity() {
                                 // Lista arquivos da pasta selecionada
                                 webViewRef?.let {
                                     println("📄 MainActivity: Iniciando listagem de arquivos da pasta")
+                                    it.post { it.evaluateJavascript(" \n" +
+                                            " spinner = new ModernSpinner({\n" +
+                                            "     type: 'wave',\n" +
+                                            "     text: 'Iniciando listagem de arquivos da pasta',\n" +
+                                            "     color: '#ff6b6b',\n" +
+                                            "     size: 80\n" +
+                                            " }).show();", null) }
                                     CoroutineScope(Dispatchers.Default).launch {
-                                        fileManager.listarArquivosDasPastas(uri, it, true){file, type ->
-
-                                            insertFile(file,  if(type ==null) type else "dir")
+                                        pathDao.deletarTudo()
+                                        fileManager.listarArquivosDasPastas(uri, it, true) { file: DocumentFile, type: String?, father: String ->
+                                            it.post {
+                                                it.evaluateJavascript("spinner.updateText('listagem de arquivos da pasta: file=${file?.name}');", null)
+                                            }
+                                            insertFile(file, type ?: "dir", father)
                                         }
-                                        var list = pathDao.listar()
-                                       it.post {
+                                            it.post {
 
-                                           it.evaluateJavascript("receberArquivos(${JSONArray(list)})", null)
-                                       }
+                                                it.evaluateJavascript("spinner.hide();", null)
+                                            }
+                                             listarArquivos()
                                            getSharedPreferences("prefs", MODE_PRIVATE)
                                             .edit()
                                             .putString("path_uri", uri.toString())
@@ -296,6 +307,7 @@ class MainActivity : ComponentActivity() {
                     interfaceJS = WebAppInterface(
                         ctx,
                         this,
+                        pathDao,
                         abrirPastaCallback,
                         fun(name: String, on_selected: (Uri) -> Unit) {
                             selectFolderURI(name, on_selected)
@@ -336,13 +348,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun homeWebSite() {
-        uriList.repository.uri?.let {
-            webViewRef?.let { webView ->
-                fileManager.listarArquivosDasPastas(it, webView,false){file, type ->
-                    insertFile(file, type)
-                }
-            }
-        }
+        listarArquivos()
+//        uriList.repository.uri?.let {
+//            webViewRef?.let { webView ->
+//                fileManager.listarArquivosDasPastas(it, webView,false){file, type ->
+//                    insertFile(file, type)
+//                }
+//            }
+//        }
     }
 
     @SuppressLint("SuspiciousIndentation")
@@ -422,27 +435,56 @@ class MainActivity : ComponentActivity() {
         }
         return null
     }
-    var level = 0
-    fun insertFile(file: DocumentFile?, type: String) {
+
+    fun insertFile(file: DocumentFile?, type: String, father:String?,Level: Int=0) {
 
         if (file == null) {
-            level+= 1
+
             return
         }
 
-
-
-        // Melhor: usar escopo de viewModel, lifecycleScope, ou passar scope como argumento
-        CoroutineScope(Dispatchers.IO).launch {
-            pathDao.inserir(
-                Path(
-                    stringUri = file.uri.toString(),
-                    name = file.name,
-                    type = type,
-                    level = level
+        println("file: ${file.name}, type:  $type, level: ${file.parentFile.uri.toString().count{ it == '/' }}, father: $father")
+        if (file != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                pathDao.inserir(
+                    Path(
+                        stringUri = file.uri.toString(),
+                        name = file.name,
+                        type = type,
+                        level = file.parentFile.uri.toString().count{ it == '/' },
+                        father = "$father "
+                    )
                 )
-            )
         }
+        // Melhor: usar escopo de viewModel, lifecycleScope, ou passar scope como argumento
+
+        }
+    }
+  fun  listarArquivos(){
+
+      CoroutineScope(Dispatchers.IO).launch {
+          webViewRef.let {
+              val listPath: List<Path> = buscarPorColuna(pathDao, pathColumns.father, "${uriList.repository.uri} ")
+              val list: List<Map<String, Any?>> = listPath.map { path ->
+
+                  mapOf(
+                      "id" to path.uid,
+                      "uri" to path.stringUri,
+                      "name" to path.name,
+                      "type" to path.type,
+                      "level" to path.level,
+                      "father" to path.father
+                  )
+              }
+              val listJson = Gson().toJson(list)
+              it?.post {
+                  println(listJson)
+                  it.evaluateJavascript("receberArquivos(${listJson})", null)
+              }
+          }
+      }
+
+
     }
 
 }

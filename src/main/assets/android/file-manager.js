@@ -38,7 +38,8 @@ class FileManager {
 
     receberArquivos(arquivosJson) {
         try {
-            const arquivos = JSON.parse(arquivosJson);
+        console.log(JSON.stringify(arquivosJson))
+            const arquivos =  arquivosJson //JSON.parse(arquivosJson);
             appState.setArquivosCarregados(arquivos);
 
             if (arquivos.length === 0) {
@@ -64,21 +65,40 @@ class FileManager {
         }
     }
 
-    async lerArquivo(nome) {
+    async lerArquivo(uri) {
         try {
-            uiController.adicionarIndicadorCarregamento(nome);
-            uiController.mostrarStatus(`Lendo arquivo: ${nome}...`, "info");
+            uiController.adicionarIndicadorCarregamento(uri);
+            uiController.mostrarStatus(`Lendo arquivo: ${uri}...`, "info");
 
-            const sucesso = androidInterface.lerArquivo(nome);
+            const sucesso = androidInterface.lerArquivo(uri);
 
             if (!sucesso) {
                 // Fallback para desenvolvimento em navegador
-                const conteudo = await androidInterface.simularLerArquivo(nome);
-                this.mostrarConteudo(conteudo, nome);
+                const conteudo = await androidInterface.simularLerArquivo(uri);
+                this.mostrarConteudo(conteudo, uri);
             }
         } catch (error) {
             uiController.mostrarStatus("Erro ao ler arquivo: " + error.message, "error");
-            uiController.removerIndicadorCarregamento(nome);
+            uiController.removerIndicadorCarregamento(uri);
+        }
+    }
+
+
+    async getUriData(uri, type) {
+        try {
+            uiController.adicionarIndicadorCarregamento(uri);
+            uiController.mostrarStatus(`Lendo arquivo: ${uri}...`, "info");
+
+            const sucesso = androidInterface.getUriData(uri, type);
+
+            if (!sucesso) {
+                // Fallback para desenvolvimento em navegador
+                const conteudo = await androidInterface.simularLerArquivo(uri);
+                this.mostrarConteudo(conteudo, uri);
+            }
+        } catch (error) {
+            uiController.mostrarStatus("Erro ao ler arquivo: " + error.message, "error");
+            uiController.removerIndicadorCarregamento(uri);
         }
     }
 
@@ -100,7 +120,7 @@ class FileManager {
 
     voltarParaLista() {
         if (appState.temArquivosCarregados()) {
-            this.receberArquivos(JSON.stringify(appState.getArquivosCarregados()));
+            this.receberArquivos(appState.getArquivosCarregados());
         } else {
             this.limparResultado();
         }
