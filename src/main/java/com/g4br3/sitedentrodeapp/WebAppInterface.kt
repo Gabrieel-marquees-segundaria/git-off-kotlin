@@ -20,7 +20,7 @@ import com.g4br3.sitedentrodeapp.dataBase.PathDao
 import com.g4br3.sitedentrodeapp.dataBase.buscarPorColuna
 import com.g4br3.sitedentrodeapp.dataBase.pathColumns
 import com.google.gson.Gson
-import org.json.JSONObject
+
 
 var uriList: UriList = UriList()
 /**
@@ -142,6 +142,12 @@ class WebAppInterface(
     fun getAllInfo():String{
       return JSONObject(this.info.all).toString()
 
+    }
+
+
+    @JavascriptInterface
+    fun getName(termo: String): String? {
+        return Gson().toJson(buscarPorColuna(pathDao, pathColumns.name, termo).toString())
     }
 
     @JavascriptInterface

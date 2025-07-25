@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.lifecycleScope
 import com.g4br3.sitedentrodeapp.components.FileManager
 import com.g4br3.sitedentrodeapp.components.UriList
 import com.g4br3.sitedentrodeapp.components.modulos
@@ -60,8 +61,8 @@ class MainActivity : ComponentActivity() {
     private val TAG = "MainActivity"
     private var webViewRef: WebView? = null
     private var uriList: UriList = UriList()
-    private var htmlContent by mutableStateOf<String?>(null)
-    private var isHtmlLoaded by mutableStateOf(false)
+    private var htmlContent: String? = null
+    private var isHtmlLoaded = false
     private lateinit var openDirectoryLauncher: ActivityResultLauncher<Uri?>
     private lateinit var openFileLauncher: ActivityResultLauncher<Array<String>>
     private var theOpenLaucherCallback: ((Uri) -> Unit)? = null
@@ -94,7 +95,7 @@ class MainActivity : ComponentActivity() {
         val uriSalva = getSharedPreferences("prefs", MODE_PRIVATE)
             .getString(uriList.html.key, null)
         uriList.html.uri = uriStatus(uriSalva) { uri ->
-            CoroutineScope(Dispatchers.Default).launch {
+            lifecycleScope.launch {
                 carregarArquivoHtml(uri)
             }
         }
@@ -205,7 +206,7 @@ class MainActivity : ComponentActivity() {
                         selectFileSAF(uriList.html.key, { uri ->
                             uriList.html.uri = uri
                             // Carrega o conteúdo do arquivo HTML
-                            CoroutineScope(Dispatchers.Default).launch {
+                            lifecycleScope.launch {
                                 carregarArquivoHtml(uri)
                             }
                         }, "text/html")
