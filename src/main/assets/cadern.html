@@ -1,0 +1,195 @@
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body-wrap {
+      display: block;
+    }
+
+    .phone-frame {
+      width: 360px;
+      margin: 2rem auto;
+      background: #e8e4dc;
+      border-radius: 40px;
+      box-shadow: 0 0 0 10px #1a1a1a, 0 30px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+      min-height: 720px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .titlebar {
+      background: linear-gradient(180deg, #f0ede8 0%, #e8e5e0 100%);
+      border-bottom: 0.5px solid rgba(0,0,0,0.12);
+      padding: 14px 16px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      border-radius: 40px 40px 0 0;
+      position: relative;
+    }
+
+    .titlebar-dots {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f57; border: 0.5px solid rgba(0,0,0,0.1); }
+    .dot-yellow { background: #febc2e; border: 0.5px solid rgba(0,0,0,0.1); }
+    .dot-green { background: #28c840; border: 0.5px solid rgba(0,0,0,0.1); }
+
+    .titlebar-title {
+      flex: 1;
+      text-align: center;
+      font-family: -apple-system, 'SF Pro Text', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #2c2c2e;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .paper-container {
+      flex: 1;
+      background: #fdf8f0;
+      position: relative;
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    .ruled-lines {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      background-image:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 31px,
+          #c8d8e8 31px,
+          #c8d8e8 32px
+        );
+      background-size: 100% 32px;
+      background-position: 0 48px;
+    }
+
+    .red-margin {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 52px;
+      width: 1.5px;
+      background: #e8a0a0;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .paper-content {
+      position: relative;
+      padding: 16px 20px 32px 64px;
+      min-height: 600px;
+    }
+
+    .page-title {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 4px;
+      line-height: 32px;
+    }
+
+    .page-date {
+      font-family: 'Caveat', cursive;
+      font-size: 13px;
+      color: #888;
+      line-height: 32px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-family: 'Lora', serif;
+      font-size: 15px;
+      line-height: 32px;
+      color: #2c3442;
+      margin-bottom: 0;
+      word-spacing: 1px;
+    }
+
+    p + p {
+      margin-top: 0;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 16px;
+      background: #4a90d9;
+      vertical-align: middle;
+      animation: blink 1.1s step-end infinite;
+      margin-left: 1px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .hole {
+      position: absolute;
+      left: 18px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #e8e4dc;
+      border: 0.5px solid rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="phone-frame">
+    <div class="titlebar">
+        <div class="titlebar-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+        </div>
+        <span class="titlebar-title">Notas</span>
+    </div>
+
+    <div class="paper-container">
+        <div class="ruled-lines"></div>
+        <div class="red-margin"></div>
+
+        <div class="hole" style="top: 72px;"></div>
+        <div class="hole" style="top: 220px;"></div>
+        <div class="hole" style="top: 368px;"></div>
+        <div class="hole" style="top: 516px;"></div>
+
+        <div class="paper-content">
+            <div class="page-title">Minha Nota</div>
+            <div class="page-date">15 de março de 2026</div>
+
+            <p>
+                Era uma manhã quieta, daquelas em que o silêncio tem textura. O café esfriava devagar sobre a mesa enquanto os pensamentos ainda procuravam sua forma — incompletos, mas presentes, como esboços à espera de tinta.
+            </p>
+
+            <p>
+                Escrever em papel sempre pareceu diferente. Há algo no atrito entre a caneta e a folha que obriga a desacelerar, a escolher com mais cuidado cada palavra antes de entregá-la ao branco.
+            </p>
+
+            <p>
+                As linhas azuis existem para guiar, não para prender. E a margem vermelha, discreta à esquerda, lembra que todo pensamento precisa de espaço para respirar antes de começar.<span class="cursor"></span>
+            </p>
+        </div>
+    </div>
+</div>

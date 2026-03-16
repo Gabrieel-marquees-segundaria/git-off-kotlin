@@ -2,6 +2,7 @@
 class AndroidInterface {
     constructor() {
         this.isAndroidAvailable = this.checkAndroidAvailability();
+        console.log(` interface js iniciado: result => ${this.isAndroidAvailable}`)
     }
 
     checkAndroidAvailability() {
@@ -9,6 +10,7 @@ class AndroidInterface {
                typeof window.Android.abrirPasta === 'function' &&
                //typeof window.Android.lerArquivo === 'function' &&
                 typeof window.Android.getUriData === 'function' &&
+                 typeof window.Android.uriReturn === 'function' &&
                typeof window.Android.listarArquivos === 'function';
     }
 
@@ -22,14 +24,14 @@ class AndroidInterface {
 
     lerArquivo(uri) {
         if (this.isAndroidAvailable) {
-            window.Android.getUriData(uri);
+            //window.Android.getUriData(uri);
             return true;
         }
         return false;
     }
-    getUriData(uri, type) {
+    getUriData(uri, type, name, id) {
         if (this.isAndroidAvailable) {
-            window.Android.getUriData(uri, type);
+            window.Android.getUriData(uri, type, name, id);
             return true;
         }
         return false;
@@ -41,7 +43,13 @@ class AndroidInterface {
         }
         return false;
     }
-
+uriReturn(){
+  if (this.isAndroidAvailable) {
+            window.Android.uriReturn();
+            return true;
+        }
+        return false;
+}
     setExternModels(){
             if (this.isAndroidAvailable) {
                 window.Android.setExternModels();

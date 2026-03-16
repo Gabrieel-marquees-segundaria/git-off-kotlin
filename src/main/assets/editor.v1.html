@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>NovaPen — Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg:        #f5f0e8;
+          --paper:     #fffdf7;
+          --ink:       #1a1208;
+          --muted:     #7a6e5f;
+          --border:    #d9d0bc;
+          --accent:    #c0392b;
+          --accent2:   #2c7a4b;
+          --toolbar-bg:#1a1208;
+          --toolbar-fg:#f5f0e8;
+          --shadow:    0 4px 32px rgba(26,18,8,.12);
+          --radius:    4px;
+        }
+
+        body {
+          background: var(--bg);
+          font-family: 'DM Sans', sans-serif;
+          color: var(--ink);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          background-image:
+            radial-gradient(circle at 20% 80%, rgba(192,57,43,.06) 0%, transparent 50%),
+            radial-gradient(circle at 80% 10%, rgba(44,122,75,.05) 0%, transparent 50%);
+        }
+
+        /* ── TITLE BAR ── */
+        #titlebar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 20px;
+          background: var(--toolbar-bg);
+          color: var(--toolbar-fg);
+          border-bottom: 2px solid var(--accent);
+          user-select: none;
+        }
+        #titlebar .logo {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.2rem;
+          letter-spacing: .04em;
+        }
+        #titlebar .logo span { color: var(--accent); font-style: italic; }
+        #doc-title {
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid rgba(245,240,232,.25);
+          color: var(--toolbar-fg);
+          font-family: 'DM Sans', sans-serif;
+          font-size: .9rem;
+          padding: 3px 8px;
+          width: 220px;
+          text-align: center;
+          outline: none;
+          transition: border-color .2s;
+        }
+        #doc-title:focus { border-color: var(--accent); }
+        #doc-title::placeholder { color: rgba(245,240,232,.4); }
+        #titlebar .actions { display: flex; gap: 8px; }
+        .tb-action {
+          background: rgba(245,240,232,.08);
+          border: 1px solid rgba(245,240,232,.18);
+          color: var(--toolbar-fg);
+          padding: 5px 14px;
+          border-radius: var(--radius);
+          font-size: .78rem;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          transition: background .15s, border-color .15s;
+          letter-spacing: .03em;
+        }
+        .tb-action:hover { background: rgba(245,240,232,.18); border-color: rgba(245,240,232,.4); }
+        .tb-action.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .tb-action.primary:hover { background: #a93226; }
+
+        /* ── TOOLBAR ── */
+        #toolbar {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 2px;
+          padding: 6px 16px;
+          background: var(--paper);
+          border-bottom: 1px solid var(--border);
+          box-shadow: 0 1px 0 rgba(0,0,0,.04);
+          position: sticky;
+          top: 0;
+          z-index: 10;
+        }
+        .sep {
+          width: 1px;
+          height: 22px;
+          background: var(--border);
+          margin: 0 5px;
+          flex-shrink: 0;
+        }
+        .btn {
+          width: 30px; height: 30px;
+          display: flex; align-items: center; justify-content: center;
+          border: none;
+          background: transparent;
+          border-radius: var(--radius);
+          cursor: pointer;
+          font-size: .85rem;
+          color: var(--muted);
+          transition: background .12s, color .12s;
+          position: relative;
+        }
+        .btn:hover { background: var(--bg); color: var(--ink); }
+        .btn.active { background: var(--ink); color: var(--paper); }
+        .btn svg { width: 15px; height: 15px; fill: currentColor; pointer-events: none; }
+
+        select.tb-select {
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background: var(--paper);
+          color: var(--ink);
+          font-family: 'DM Sans', sans-serif;
+          font-size: .78rem;
+          padding: 3px 6px;
+          cursor: pointer;
+          outline: none;
+          height: 30px;
+        }
+        select.tb-select:focus { border-color: var(--accent); }
+
+        input[type="color"].tb-color {
+          width: 30px; height: 30px;
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background: var(--paper);
+          cursor: pointer;
+          padding: 2px;
+        }
+
+        /* tooltip */
+        .btn[data-tip]::after {
+          content: attr(data-tip);
+          position: absolute;
+          bottom: -28px;
+          left: 50%; transform: translateX(-50%);
+          background: var(--ink);
+          color: var(--paper);
+          font-size: .68rem;
+          padding: 3px 7px;
+          border-radius: 3px;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity .15s;
+          z-index: 99;
+        }
+        .btn[data-tip]:hover::after { opacity: 1; }
+
+        /* ── MAIN LAYOUT ── */
+        #layout {
+          flex: 1;
+          display: flex;
+          overflow: hidden;
+        }
+
+        /* ── SIDEBAR ── */
+        #sidebar {
+          width: 200px;
+          background: var(--paper);
+          border-right: 1px solid var(--border);
+          display: flex;
+          flex-direction: column;
+          padding: 16px 0;
+          flex-shrink: 0;
+          transition: width .25s;
+        }
+        #sidebar.collapsed { width: 0; overflow: hidden; padding: 0; }
+        .sidebar-label {
+          font-size: .65rem;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+          color: var(--muted);
+          padding: 0 16px 8px;
+          font-weight: 500;
+        }
+        .outline-item {
+          padding: 5px 16px;
+          font-size: .82rem;
+          color: var(--muted);
+          cursor: pointer;
+          border-left: 2px solid transparent;
+          transition: all .15s;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .outline-item:hover { color: var(--ink); background: var(--bg); border-color: var(--accent); }
+        .outline-item.h1 { font-weight: 600; color: var(--ink); }
+        .outline-item.h2 { padding-left: 24px; }
+        .outline-item.h3 { padding-left: 32px; font-size: .76rem; }
+
+        #stats {
+          margin-top: auto;
+          padding: 12px 16px;
+          border-top: 1px solid var(--border);
+          font-size: .72rem;
+          color: var(--muted);
+          line-height: 1.7;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ── EDITOR AREA ── */
+        #editor-wrap {
+          flex: 1;
+          overflow-y: auto;
+          padding: 40px 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        #editor-wrap::-webkit-scrollbar { width: 6px; }
+        #editor-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+        #page {
+          width: 100%;
+          max-width: 720px;
+          min-height: 1056px;
+          background: var(--paper);
+          border-radius: 2px;
+          box-shadow: var(--shadow), 0 0 0 1px var(--border);
+          padding: 72px 80px;
+          position: relative;
+          animation: fadeSlide .4s ease both;
+        }
+        @keyframes fadeSlide {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ruled-paper effect */
+        #page::before {
+          content: '';
+          position: absolute;
+          inset: 72px 80px;
+          background-image: repeating-linear-gradient(
+            transparent, transparent 27px, rgba(209,199,183,.35) 27px, rgba(209,199,183,.35) 28px
+          );
+          pointer-events: none;
+        }
+        #page::after {
+          content: '';
+          position: absolute;
+          top: 0; bottom: 0;
+          left: 118px;
+          width: 1px;
+          background: rgba(192,57,43,.12);
+          pointer-events: none;
+        }
+
+        #editor {
+          outline: none;
+          font-family: 'Playfair Display', serif;
+          font-size: 1.05rem;
+          line-height: 1.85;
+          color: var(--ink);
+          min-height: 900px;
+          position: relative;
+          z-index: 1;
+          caret-color: var(--accent);
+        }
+        #editor:empty::before {
+          content: attr(data-placeholder);
+          color: rgba(122,110,95,.45);
+          pointer-events: none;
+          position: absolute;
+          font-style: italic;
+        }
+
+        /* heading styles inside editor */
+        #editor h1 { font-size: 2rem; line-height: 1.3; margin: .5em 0 .3em; color: var(--ink); border-bottom: 2px solid var(--accent); padding-bottom: .2em; }
+        #editor h2 { font-size: 1.4rem; line-height: 1.4; margin: .8em 0 .3em; }
+        #editor h3 { font-size: 1.1rem; line-height: 1.5; margin: .6em 0 .2em; color: var(--muted); }
+        #editor p  { margin-bottom: .5em; }
+        #editor b, #editor strong { color: var(--ink); }
+        #editor a  { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+        #editor blockquote {
+          border-left: 3px solid var(--accent);
+          margin: 1em 0;
+          padding: .4em 1.2em;
+          color: var(--muted);
+          font-style: italic;
+        }
+        #editor ul, #editor ol { padding-left: 1.5em; margin-bottom: .5em; }
+        #editor li { margin-bottom: .2em; }
+        #editor pre, #editor code {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .85em;
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-radius: 3px;
+          padding: .1em .4em;
+        }
+        #editor pre { padding: .8em 1em; display: block; overflow-x: auto; }
+        #editor mark { background: rgba(255,220,60,.5); border-radius: 2px; padding: 0 2px; }
+        #editor hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
+
+        /* ── STATUS BAR ── */
+        #statusbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 5px 20px;
+          background: var(--toolbar-bg);
+          color: rgba(245,240,232,.55);
+          font-size: .7rem;
+          font-family: 'JetBrains Mono', monospace;
+          border-top: 1px solid rgba(245,240,232,.08);
+        }
+        #statusbar .mode {
+          background: var(--accent);
+          color: #fff;
+          padding: 1px 8px;
+          border-radius: 2px;
+          font-size: .65rem;
+          letter-spacing: .06em;
+        }
+
+        /* ── FIND BAR ── */
+        #findbar {
+          display: none;
+          align-items: center;
+          gap: 8px;
+          padding: 7px 16px;
+          background: var(--paper);
+          border-bottom: 1px solid var(--border);
+          animation: slideDown .2s ease;
+        }
+        #findbar.open { display: flex; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        #findbar input {
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          padding: 4px 10px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: .82rem;
+          outline: none;
+          background: var(--bg);
+          color: var(--ink);
+          width: 200px;
+        }
+        #findbar input:focus { border-color: var(--accent); }
+        #findbar .find-btn {
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background: var(--paper);
+          color: var(--muted);
+          padding: 4px 10px;
+          font-size: .78rem;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          transition: all .12s;
+        }
+        #findbar .find-btn:hover { background: var(--bg); color: var(--ink); }
+        #findbar .close-find {
+          margin-left: auto;
+          cursor: pointer;
+          color: var(--muted);
+          font-size: 1rem;
+          padding: 0 4px;
+        }
+        #findbar .close-find:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<!-- TITLE BAR -->
+<div id="titlebar">
+    <div class="logo">Nova<span>Pen</span></div>
+    <input id="doc-title" type="text" placeholder="Sem título" spellcheck="false"/>
+    <div class="actions">
+        <button class="tb-action" onclick="toggleFind()">Localizar</button>
+        <button class="tb-action" onclick="exportTxt()">Exportar .txt</button>
+        <button class="tb-action primary" onclick="saveLocal()">Salvar</button>
+    </div>
+</div>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+    <!-- History -->
+    <button class="btn" data-tip="Desfazer" onclick="document.execCommand('undo')">
+        <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+    </button>
+    <button class="btn" data-tip="Refazer" onclick="document.execCommand('redo')">
+        <svg viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 9 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+    </button>
+
+    <div class="sep"></div>
+
+    <!-- Font family -->
+    <select class="tb-select" id="fontFamilySelect" onchange="setFont(this.value)">
+        <option value="'Playfair Display', serif">Playfair Display</option>
+        <option value="'DM Sans', sans-serif">DM Sans</option>
+        <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+        <option value="Georgia, serif">Georgia</option>
+        <option value="'Times New Roman', serif">Times New Roman</option>
+    </select>
+
+    <!-- Font size -->
+    <select class="tb-select" id="fontSizeSelect" onchange="setSize(this.value)" style="width:52px">
+        <option>10</option><option>12</option><option selected>14</option>
+        <option>16</option><option>18</option><option>20</option>
+        <option>24</option><option>28</option><option>36</option><option>48</option>
+    </select>
+
+    <div class="sep"></div>
+
+    <!-- Style -->
+    <button class="btn" data-tip="Negrito (Ctrl+B)" onclick="fmt('bold')">
+        <svg viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
+    </button>
+    <button class="btn" data-tip="Itálico (Ctrl+I)" onclick="fmt('italic')">
+        <svg viewBox="0 0 24 24"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>
+    </button>
+    <button class="btn" data-tip="Sublinhado (Ctrl+U)" onclick="fmt('underline')">
+        <svg viewBox="0 0 24 24"><path d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"/></svg>
+    </button>
+    <button class="btn" data-tip="Tachado" onclick="fmt('strikeThrough')">
+        <svg viewBox="0 0 24 24"><path d="M6.85 7.08C6.85 4.37 9.45 3 12.24 3c1.64 0 3 .49 3.9 1.28.77.65 1.46 1.73 1.46 3.24h-3.01c0-.31-.05-.59-.15-.85-.29-.86-1.2-1.28-2.25-1.28-1.86 0-2.34.98-2.34 1.7 0 .48.25.88.74 1.21.38.25.77.48 1.41.7H7.39c-.29-.3-.54-.66-.54-1.22zM21 12v-2H3v2h9.62c1.15.45 1.96.75 1.96 1.97 0 1-.81 1.67-2.28 1.67-1.54 0-2.93-.54-2.93-2.51H6.4c0 .55.08 1.13.24 1.58.81 2.29 3.29 3.3 5.67 3.3 2.27 0 5.3-.89 5.3-4.05 0-.3-.04-.58-.1-.85L21 12z"/></svg>
+    </button>
+    <button class="btn" data-tip="Destaque" onclick="fmt('hiliteColor','rgba(255,220,60,.6)')">
+        <svg viewBox="0 0 24 24"><path d="M7 22l2-4h6l2 4H7zm5-16L5.5 20h2.25L9 18h6l1.25 2h2.25L12 6zm0 3.68L14.25 16h-4.5L12 9.68z"/></svg>
+    </button>
+
+    <div class="sep"></div>
+
+    <!-- Headings -->
+    <button class="btn" data-tip="Título 1" onclick="heading('h1')" style="font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;width:36px">H1</button>
+    <button class="btn" data-tip="Título 2" onclick="heading('h2')" style="font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;width:36px">H2</button>
+    <button class="btn" data-tip="Título 3" onclick="heading('h3')" style="font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;width:36px">H3</button>
+
+    <div class="sep"></div>
+
+    <!-- Align -->
+    <button class="btn" data-tip="Alinhar à esquerda" onclick="fmt('justifyLeft')">
+        <svg viewBox="0 0 24 24"><path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/></svg>
+    </button>
+    <button class="btn" data-tip="Centralizar" onclick="fmt('justifyCenter')">
+        <svg viewBox="0 0 24 24"><path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"/></svg>
+    </button>
+    <button class="btn" data-tip="Justificar" onclick="fmt('justifyFull')">
+        <svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"/></svg>
+    </button>
+    <button class="btn" data-tip="Alinhar à direita" onclick="fmt('justifyRight')">
+        <svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>
+    </button>
+
+    <div class="sep"></div>
+
+    <!-- Lists -->
+    <button class="btn" data-tip="Lista com marcadores" onclick="fmt('insertUnorderedList')">
+        <svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>
+    </button>
+    <button class="btn" data-tip="Lista numerada" onclick="fmt('insertOrderedList')">
+        <svg viewBox="0 0 24 24"><path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"/></svg>
+    </button>
+    <button class="btn" data-tip="Citação" onclick="fmt('formatBlock','blockquote')">
+        <svg viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+    </button>
+    <button class="btn" data-tip="Linha divisória" onclick="insertHR()">
+        <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+    </button>
+
+    <div class="sep"></div>
+
+    <!-- Color -->
+    <input type="color" class="tb-color" id="fontColor" title="Cor do texto" value="#1a1208" onchange="fmt('foreColor',this.value)"/>
+
+    <div class="sep"></div>
+
+    <!-- Indent -->
+    <button class="btn" data-tip="Aumentar recuo" onclick="fmt('indent')">
+        <svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zM3 8v8l4-4-4-4zm8 9h10v-2H11v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z"/></svg>
+    </button>
+    <button class="btn" data-tip="Diminuir recuo" onclick="fmt('outdent')">
+        <svg viewBox="0 0 24 24"><path d="M11 17h10v-2H11v2zM3 12l4 4V8l-4 4zm-2 9h18v-2H1v2zM1 3v2h18V3H1zm10 6h10V7H11v2zm0 4h10v-2H11v2z"/></svg>
+    </button>
+
+    <div class="sep"></div>
+
+    <!-- Clear -->
+    <button class="btn" data-tip="Limpar formatação" onclick="fmt('removeFormat')">
+        <svg viewBox="0 0 24 24"><path d="M3.27 5L2 6.27l6.97 6.97L6.5 19h3l1.57-3.97L17.73 21 19 19.73 3.27 5zM6 5v.18L8.82 8h2.4l-.72 1.68 2.1 2.1L14.21 8H20V5H6z"/></svg>
+    </button>
+
+    <!-- Sidebar toggle -->
+    <button class="btn" data-tip="Painel lateral" onclick="toggleSidebar()" style="margin-left:auto">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+</div>
+
+<!-- FIND BAR -->
+<div id="findbar">
+    <input id="findInput" placeholder="Localizar…" oninput="highlight()" onkeydown="if(e.key==='Escape')toggleFind()"/>
+    <button class="find-btn" onclick="findPrev()">↑ Anterior</button>
+    <button class="find-btn" onclick="findNext()">↓ Próximo</button>
+    <span id="findCount" style="font-size:.75rem;color:var(--muted);min-width:60px"></span>
+    <span class="close-find" onclick="toggleFind()">✕</span>
+</div>
+
+<!-- MAIN -->
+<div id="layout">
+    <div id="sidebar">
+        <div class="sidebar-label">Estrutura</div>
+        <div id="outline"></div>
+        <div id="stats">
+            <div id="stat-words">Palavras: 0</div>
+            <div id="stat-chars">Chars: 0</div>
+            <div id="stat-lines">Linhas: 0</div>
+            <div id="stat-time" style="margin-top:4px;opacity:.6"></div>
+        </div>
+    </div>
+
+    <div id="editor-wrap">
+        <div id="page">
+            <div id="editor"
+                 contenteditable="true"
+                 spellcheck="true"
+                 data-placeholder="Comece a escrever aqui…"
+            ></div>
+        </div>
+    </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+    <span class="mode">EDITAR</span>
+    <span id="sb-cursor">Ln 1, Col 1</span>
+    <span id="sb-saved">não salvo</span>
+    <span>NovaPen v1.0</span>
+</div>
+
+<script>
+    const editor = document.getElementById('editor');
+    let saveTimer, findMatches = [], findIdx = 0;
+
+    // ── COMMANDS ──
+    function fmt(cmd, val) {
+      editor.focus();
+      document.execCommand(cmd, false, val || null);
+      updateStats();
+    }
+    function heading(tag) {
+      editor.focus();
+      document.execCommand('formatBlock', false, tag);
+      updateOutline();
+    }
+    function setFont(f) { fmt('fontName', f); }
+    function setSize(s) { fmt('fontSize', s > 7 ? 7 : s); /* fallback */ editor.focus(); document.execCommand('fontSize',false,'7'); document.querySelectorAll('font[size="7"]').forEach(el=>{ el.removeAttribute('size'); el.style.fontSize=s+'pt'; }); }
+    function insertHR() { editor.focus(); document.execCommand('insertHtml',false,'<hr/>'); }
+
+    // ── STATS ──
+    function updateStats() {
+      const text = editor.innerText || '';
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById('stat-words').textContent = 'Palavras: '+words;
+      document.getElementById('stat-chars').textContent = 'Chars: '+text.length;
+      document.getElementById('stat-lines').textContent = 'Linhas: '+(text.split('\n').length);
+      updateOutline();
+      markDirty();
+    }
+
+    // ── OUTLINE ──
+    function updateOutline() {
+      const box = document.getElementById('outline');
+      box.innerHTML = '';
+      editor.querySelectorAll('h1,h2,h3').forEach(el => {
+        const d = document.createElement('div');
+        d.className = 'outline-item ' + el.tagName.toLowerCase();
+        d.textContent = el.textContent.trim() || '(sem título)';
+        d.onclick = () => el.scrollIntoView({behavior:'smooth',block:'start'});
+        box.appendChild(d);
+      });
+    }
+
+    // ── CURSOR POS ──
+    document.addEventListener('selectionchange', () => {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const r = sel.getRangeAt(0);
+      const text = editor.innerText.substring(0, r.startOffset);
+      const ln = (text.match(/\n/g)||[]).length + 1;
+      const col = r.startOffset - text.lastIndexOf('\n');
+      document.getElementById('sb-cursor').textContent = `Ln ${ln}, Col ${col}`;
+    });
+
+    // ── DIRTY / SAVE ──
+    function markDirty() {
+      document.getElementById('sb-saved').textContent = 'modificado';
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveLocal, 30000);
+    }
+    function saveLocal() {
+      localStorage.setItem('novapen_content', editor.innerHTML);
+      localStorage.setItem('novapen_title', document.getElementById('doc-title').value);
+      const now = new Date();
+      document.getElementById('sb-saved').textContent = 'salvo ' + now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      document.getElementById('stat-time').textContent = 'Salvo às ' + now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+    function exportTxt() {
+      const title = document.getElementById('doc-title').value || 'documento';
+      const blob = new Blob([editor.innerText], {type:'text/plain;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = title + '.txt';
+      a.click();
+    }
+
+    // ── FIND ──
+    function toggleFind() {
+      const fb = document.getElementById('findbar');
+      fb.classList.toggle('open');
+      if (fb.classList.contains('open')) document.getElementById('findInput').focus();
+      else clearHighlights();
+    }
+    function highlight() {
+      clearHighlights();
+      const q = document.getElementById('findInput').value;
+      if (!q) { document.getElementById('findCount').textContent=''; return; }
+      const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      findMatches = [];
+      nodes.forEach(node => {
+        let t = node.textContent, idx;
+        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+        const frags = [];
+        let last = 0;
+        while ((idx = re.exec(t)) !== null) {
+          frags.push(document.createTextNode(t.slice(last, idx.index)));
+          const mark = document.createElement('mark');
+          mark.textContent = idx[0];
+          mark.className = 'find-mark';
+          frags.push(mark);
+          findMatches.push(mark);
+          last = re.lastIndex;
+        }
+        if (!frags.length) return;
+        frags.push(document.createTextNode(t.slice(last)));
+        const span = document.createElement('span');
+        frags.forEach(f => span.appendChild(f));
+        node.parentNode.replaceChild(span, node);
+      });
+      findIdx = 0;
+      document.getElementById('findCount').textContent = findMatches.length ? `1 / ${findMatches.length}` : 'Nenhum';
+      if (findMatches.length) scrollToMatch(0);
+    }
+    function clearHighlights() {
+      editor.querySelectorAll('.find-mark').forEach(m => {
+        m.replaceWith(document.createTextNode(m.textContent));
+      });
+      editor.normalize();
+      findMatches = [];
+    }
+    function scrollToMatch(i) {
+      findMatches.forEach((m,j) => m.style.background = j===i ? 'rgba(255,140,0,.7)' : 'rgba(255,220,60,.5)');
+      if (findMatches[i]) findMatches[i].scrollIntoView({block:'center'});
+      document.getElementById('findCount').textContent = `${i+1} / ${findMatches.length}`;
+    }
+    function findNext() { if (!findMatches.length) return; findIdx=(findIdx+1)%findMatches.length; scrollToMatch(findIdx); }
+    function findPrev() { if (!findMatches.length) return; findIdx=(findIdx-1+findMatches.length)%findMatches.length; scrollToMatch(findIdx); }
+
+    // ── SIDEBAR ──
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    // ── KEYBOARD SHORTCUTS ──
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey||e.metaKey) && e.key==='f') { e.preventDefault(); toggleFind(); }
+      if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); saveLocal(); }
+    });
+
+    // ── INIT ──
+    const saved = localStorage.getItem('novapen_content');
+    if (saved) editor.innerHTML = saved;
+    const savedTitle = localStorage.getItem('novapen_title');
+    if (savedTitle) document.getElementById('doc-title').value = savedTitle;
+
+    editor.addEventListener('input', updateStats);
+    updateStats();
+
+    // clock
+    setInterval(() => {
+      const now = new Date();
+      // just keep time alive in status if needed
+    }, 60000);
+</script>
+</body>
+</html>

@@ -37,8 +37,8 @@ function listar_arquivos() {
 function lerArquivo(uri) {
     fileManager.lerArquivo(uri);
 }
-function getUriData(uri, type) {
-    fileManager.getUriData(uri, type);
+function getUriData(uri, type, name, id) {
+    fileManager.getUriData(uri, type, name, id);
 }
 function voltarParaLista() {
     fileManager.voltarParaLista();
@@ -49,6 +49,7 @@ function limparResultado() {
 }
 
 function receberArquivos(arquivosJson) {
+console.log(JSON.stringify(arquivosJson))
     fileManager.receberArquivos(arquivosJson);
 }
 
@@ -63,6 +64,9 @@ function mostrarStatus(mensagem, tipo = "info") {
 }
 function setExternModels(){
 fileManager.setExternModels()
+}
+function uriReturn(){
+  fileManager.uriReturn()
 }
 // Inicialização da aplicação
 const app = new App();

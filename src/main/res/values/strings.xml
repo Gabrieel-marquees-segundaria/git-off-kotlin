@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">site dentro de app</string>
+    <string name="link">Visit &lt;a href="https://site.com"&gt;Site&lt;/a&gt;</string>
 </resources>

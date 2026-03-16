@@ -57,18 +57,13 @@
     <script>
         function mostrarConteudo(conteudo) {
             document.getElementById("resultado").innerHTML =
-                "<h3>Conteúdo do arquivo:</h3><pre>" + conteudo + "</pre>";
+                "<pre>" + conteudo + "</pre>";
         }
 
-
-    function voltarParaLista() {
-        window.Android.voltarParaLista(); // ✅ Novo método para voltar corretamente
-    }
     </script>
 </head>
 <body>
-<h2>Visualizador de Arquivo</h2>
-<button class="voltar" onclick="voltarParaLista()">← Voltar para Lista</button>
+
 <div id="resultado">
     <p>Aguardando conteúdo do arquivo...</p>
 </div>

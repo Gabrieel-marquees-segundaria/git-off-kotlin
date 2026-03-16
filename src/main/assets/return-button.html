@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botão Return</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            height: 200vh; /* Para demonstrar o scroll */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+
+        .content {
+            padding: 50px;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Página de Exemplo</h1>
+        <p>Role a página para baixo para ver o botão return em ação!</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    </div>
+
+    <script>
+        // Criar o botão return
+        function createReturnButton() {
+            const button = document.createElement('button');
+
+            // Configurar o conteúdo do botão (ícone de seta)
+            button.innerHTML = '↩';
+            button.title = 'Voltar';
+
+            // Aplicar estilos CSS via JavaScript
+            const styles = {
+                position: 'fixed',
+                bottom: '20px',
+                left: '20px',
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: '#333',
+                color: 'white',
+                fontSize: '20px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                zIndex: '1000',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                outline: 'none'
+            };
+
+            // Aplicar cada estilo
+            Object.assign(button.style, styles);
+
+            // Adicionar efeitos hover
+            button.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#555';
+                this.style.transform = 'scale(1.1)';
+                this.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.4)';
+            });
+
+            button.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '#333';
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            });
+
+            // Adicionar funcionalidade de clique
+            button.addEventListener('click', function() {
+                // Você pode personalizar esta ação:
+                // window.history.back(); // Para voltar na história do navegador
+                // window.location.href = '/'; // Para ir para página inicial
+                // scrollToTop(); // Para rolar para o topo
+
+                // Exemplo: voltar na história do navegador
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    alert('Não há página anterior para voltar!');
+                }
+            });
+
+            // Adicionar o botão ao documento
+            document.body.appendChild(button);
+
+            return button;
+        }
+
+        // Criar o botão quando a página carregar
+        document.addEventListener('DOMContentLoaded', createReturnButton);
+
+        // Alternativa para rolar para o topo (descomente se preferir)
+        /*
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        */
+    </script>
+</body>
+</html>

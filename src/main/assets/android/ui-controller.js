@@ -26,7 +26,8 @@ class UIController {
 
         let listaHtml = '<ul class="file-list">';
         arquivos.forEach(file => {
-            listaHtml += `<li class="file-item" onclick="getUriData('${file.uri}','${file.type}')" data-file="${file.id}">
+            console.log(JSON.stringify(file))
+            listaHtml += `<li class="file-item" onclick="getUriData('${file.uri}','${file.type}', '${file.name}', ${file.id})" data-file="${file.id}">
                 <span>${file.name}</span>
             </li>`;
         });

@@ -35,7 +35,9 @@ class FileManager {
             );
         }
     }
-
+uriReturn(){
+const sucesso = androidInterface.uriReturn();
+}
     receberArquivos(arquivosJson) {
         try {
         console.log(JSON.stringify(arquivosJson))
@@ -84,17 +86,18 @@ class FileManager {
     }
 
 
-    async getUriData(uri, type) {
+    async getUriData(uri, type, name, id) {
         try {
             uiController.adicionarIndicadorCarregamento(uri);
-            uiController.mostrarStatus(`Lendo arquivo: ${uri}...`, "info");
+            uiController.mostrarStatus(`Lendo arquivo:id=${id} ${uri}...`, "info");
 
-            const sucesso = androidInterface.getUriData(uri, type);
+            const sucesso = androidInterface.getUriData(uri, type, name, id);
 
             if (!sucesso) {
+             uiController.mostrarStatus("Erro ao ler arquivo: ", "error");
                 // Fallback para desenvolvimento em navegador
                 const conteudo = await androidInterface.simularLerArquivo(uri);
-                this.mostrarConteudo(conteudo, uri);
+               this.mostrarConteudo(conteudo, uri);
             }
         } catch (error) {
             uiController.mostrarStatus("Erro ao ler arquivo: " + error.message, "error");

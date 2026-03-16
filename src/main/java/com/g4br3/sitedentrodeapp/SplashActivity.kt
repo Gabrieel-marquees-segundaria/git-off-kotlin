@@ -14,21 +14,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.g4br3.sitedentrodeapp.components.Loader
-import com.g4br3.sitedentrodeapp.components.UriList
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-import com.g4br3.sitedentrodeapp.components.FileManager
-import com.g4br3.sitedentrodeapp.components.JSLoader
-import com.g4br3.sitedentrodeapp.components.LoadExternalModel
-import com.g4br3.sitedentrodeapp.components.modulos
+
 import kotlinx.coroutines.withContext
 
-
-var uriListS = UriList()
-var loader = Loader()
 
 
 
@@ -36,64 +29,30 @@ var loader = Loader()
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
-    private lateinit var jsLoader: JSLoader
-    private lateinit var fileManager: FileManager
-    private lateinit var externalModel: LoadExternalModel
+
 
     private val TAG = "SplashActivity"
     private var dataBasekey: String = ""
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate() - Starting SplashActivity")
         super.onCreate(savedInstanceState)
         installSplashScreen()
-       jsLoader = JSLoader(this)
-        fileManager = FileManager(this)
+
 
         Log.d(TAG, "Launching coroutine to load saved URI")
         CoroutineScope(Dispatchers.Default).launch {
             Log.d(TAG, "Coroutine started on ${Thread.currentThread().name}")
 
-            try {
-                val sharedPrefs = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-                val getStringDefalt: String = "uri not found"
-                Log.d(TAG, "SharedPreferences retrieved successfully")
-               // val uriPathSalva = sharedPrefs.getString(uriListS.repository.key, getStringDefalt)
-
-                val uriExternalModel: String? = sharedPrefs.getString(uriListS.externalModulejs.key, getStringDefalt)
-
-                val intModulos: String= jsLoaderSetup()
-                var dataString = ""
-                if (uriExternalModel != getStringDefalt){
-                    externalModel = LoadExternalModel(fileManager, Uri.parse(uriExternalModel))
-                    val externalModelString: String = externalModel.stringBuilder.toString()
-                     dataString  = "$intModulos\n\n\n$externalModelString"
-                }
-                else {
-                    dataString = intModulos
-
-                }
-                sharedPrefs.edit().putString(dataBasekey, dataString).apply()
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading URI from SharedPreferences", e)
-            }
             // apos terminar de carregar vai para main
             withContext(Dispatchers.Main){
                 val intent = Intent(this@SplashActivity, MainActivity::class.java)
-                try {
 
-                    Log.d(TAG, "Intent created for MainActivity")
-                    Log.d(TAG, "dados enviadospara MainActivity")
-                    //intent.putExtra("FILE_DATA", AppData("h", ))
-                    intent.putExtra(modulos, dataBasekey)
                     startActivity(intent)
                     Log.d(TAG, "MainActivity started successfully")
                     finish()
                     Log.d(TAG, "SplashActivity finished")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error starting MainActivity", e)
-                }
 
             }
         }
@@ -149,8 +108,6 @@ class SplashActivity : AppCompatActivity() {
         super.onDestroy()
         Log.d(TAG, "onDestroy() called")
     }
-    fun jsLoaderSetup(): String {
-       return jsLoader.JsJuncao()
-    }
+
 
 }

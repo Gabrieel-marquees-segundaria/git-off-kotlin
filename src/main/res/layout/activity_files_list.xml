@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F1117"
+    tools:context=".FilesListActivity">
+
+    <!-- AppBar com TopAppBar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#0F1117"
+        app:elevation="0dp">
+
+<!--        <com.google.android.material.appbar.MaterialToolbar-->
+<!--            android:id="@+id/toolbar"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="?attr/actionBarSize"-->
+<!--            android:paddingHorizontal="8dp"-->
+<!--            app:title="Meus Arquivos"-->
+<!--            app:titleTextColor="#FFFFFF"-->
+<!--            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"-->
+<!--            app:navigationIcon="@drawable/ic_menu_foreground"-->
+<!--            app:navigationIconTint="#FFFFFF"-->
+<!--            app:menu="@menu/menu_file_list" />-->
+
+        <!-- Barra de busca -->
+        <!-- Substituir o TextInputLayout solto por este bloco -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/searchLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:boxCornerRadiusBottomEnd="26dp"
+                app:boxCornerRadiusBottomStart="26dp"
+                app:boxCornerRadiusTopEnd="26dp"
+                app:boxCornerRadiusTopStart="26dp"
+                app:boxStrokeColor="#2A2D3A"
+                app:boxBackgroundColor="#1A1D27"
+                app:startIconDrawable="@drawable/ic_search_foreground"
+                app:startIconTint="#7C7F9C"
+                app:hintTextColor="#7C7F9C">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/searchEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="Buscar arquivos..."
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#7C7F9C"
+                    android:textSize="14sp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:background="@null" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="34dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="1dp"
+                android:layout_marginStart="3dp"
+                android:src="@drawable/ic_menu_foreground"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Menu"
+                app:tint="#7C7F9C" />
+        </LinearLayout>
+        <!-- Chips de filtro -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="14dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTodos"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="Todos"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:checked="true"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    app:chipStrokeColor="#2A2D3A"
+                    app:chipStrokeWidth="1dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipImagens"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="Imagens"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    app:chipStrokeColor="#2A2D3A"
+                    app:chipStrokeWidth="1dp"
+                    app:chipIconTint="#FF6B6B"
+                    app:chipIcon="@mipmap/ic_image" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipDocumentos"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="Documentos"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    app:chipStrokeColor="#2A2D3A"
+                    app:chipStrokeWidth="1dp"
+                    app:chipIconTint="#4D9FFF"
+                    app:chipIcon="@mipmap/ic_document" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipVideos"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="Vídeos"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    app:chipStrokeColor="#2A2D3A"
+                    app:chipStrokeWidth="1dp"
+                    app:chipIconTint="#A855F7"
+                    app:chipIcon="@mipmap/ic_video" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAudios"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="Áudios"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/chip_background_selector"
+                    app:chipStrokeColor="#2A2D3A"
+                    app:chipStrokeWidth="1dp"
+                    app:chipIconTint="#22C55E"
+                    app:chipIcon="@mipmap/ic_audio" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </HorizontalScrollView>
+
+        <!-- Linha separadora sutil -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1A1D27" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Conteúdo principal -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Cabeçalho da seção: Recentes -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Recentes"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:letterSpacing="0.02"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/tvVerTodos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ver todos"
+                    android:textColor="#4D9FFF"
+                    android:textSize="13sp"
+                    android:paddingVertical="4dp"
+                    android:paddingHorizontal="4dp" />
+
+            </LinearLayout>
+
+            <!-- Lista de Arquivos Recentes (RecyclerView horizontal para preview) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRecentes"
+                android:layout_width="match_parent"
+                android:layout_height="130dp"
+                android:paddingHorizontal="12dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_file_recent"
+                tools:itemCount="5" />
+
+            <!-- Cabeçalho da seção: Todos os arquivos -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="24dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Todos os Arquivos"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:letterSpacing="0.02"
+                    android:fontFamily="sans-serif-medium" />
+
+                <!-- Contador de arquivos -->
+                <TextView
+                    android:id="@+id/tvContador"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="24 itens"
+                    android:textColor="#7C7F9C"
+                    android:textSize="12sp" />
+
+                <!-- Botão alternar visualização -->
+                <ImageButton
+                    android:id="@+id/btnToggleView"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_view_list_foreground"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Alternar visualização"
+                    app:tint="#7C7F9C" />
+
+            </LinearLayout>
+
+            <!-- Lista principal de arquivos -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvArquivos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="88dp"
+                android:clipToPadding="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_file"
+                tools:itemCount="8" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Estado vazio (visível quando não há arquivos) -->
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:visibility="gone">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@mipmap/ic_folder_empty"
+            android:alpha="0.3"
+            android:contentDescription="Nenhum arquivo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Nenhum arquivo encontrado"
+            android:textColor="#7C7F9C"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Adicione arquivos tocando no botão +"
+            android:textColor="#4A4D60"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- FAB para adicionar arquivo -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabAdicionar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:text="Adicionar"
+        android:textColor="#FFFFFF"
+        app:icon="@drawable/ic_add_foreground"
+        app:iconTint="#FFFFFF"
+        app:backgroundTint="#4D9FFF"
+        app:elevation="6dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
