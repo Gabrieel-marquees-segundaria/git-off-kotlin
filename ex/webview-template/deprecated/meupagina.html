@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Comunicação Android ↔ JS</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                margin: 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: #333;
+                line-height: 1.6;
+            }
+            
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            }
+            
+            h2 {
+                color: #2c3e50;
+                margin-bottom: 30px;
+                font-size: 2em;
+                text-align: center;
+                font-weight: 600;
+            }
+            
+            .controls {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+            
+            button {
+                background: linear-gradient(45deg, #3498db, #2980b9);
+                border: none;
+                color: white;
+                padding: 15px 25px;
+                cursor: pointer;
+                font-size: 16px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                font-weight: 500;
+                box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+                flex: 1;
+                min-width: 200px;
+            }
+            
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            }
+            
+            button:active {
+                transform: translateY(0);
+            }
+            
+            button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+            
+            .status {
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 8px;
+                font-weight: 500;
+                text-align: center;
+                display: none;
+            }
+            
+            .status.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .status.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .status.info {
+                background: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+            }
+            
+            #resultado {
+                margin-top: 20px;
+                padding: 20px;
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                min-height: 60px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s ease;
+            }
+            
+            #resultado:empty::before {
+                content: "Nenhum arquivo selecionado ainda...";
+                color: #6c757d;
+                font-style: italic;
+            }
+            
+            .file-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .file-item {
+                display: flex;
+                align-items: center;
+                padding: 15px;
+                margin-bottom: 10px;
+                background: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+            
+            .file-item:hover {
+                background: #e7f3ff;
+                border-color: #3498db;
+                transform: translateX(5px);
+            }
+            
+            .file-item::before {
+                content: "📄";
+                font-size: 1.2em;
+                margin-right: 12px;
+            }
+            
+            .file-item.loading::after {
+                content: "⏳";
+                position: absolute;
+                right: 15px;
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            .file-content {
+                background: #2d3748;
+                color: #e2e8f0;
+                padding: 20px;
+                border-radius: 8px;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                line-height: 1.5;
+                overflow-x: auto;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                max-height: 400px;
+                overflow-y: auto;
+                margin-top: 15px;
+            }
+            
+            .file-content::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .file-content::-webkit-scrollbar-track {
+                background: #4a5568;
+            }
+            
+            .file-content::-webkit-scrollbar-thumb {
+                background: #718096;
+                border-radius: 4px;
+            }
+            
+            .back-button {
+                background: linear-gradient(45deg, #6c757d, #5a6268);
+                margin-bottom: 15px;
+                min-width: auto;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            .back-button:hover {
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            }
+            
+            @media (max-width: 600px) {
+                .container {
+                    padding: 20px;
+                    margin: 10px;
+                }
+                
+                .controls {
+                    flex-direction: column;
+                }
+                
+                button {
+                    min-width: auto;
+                }
+                
+                h2 {
+                    font-size: 1.5em;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>📱 Leitor de Arquivos Android</h2>
+            
+            <div class="controls">
+                <button onclick="abrirPastaAndroid()" id="btnSelecionar">
+                    🗂️ Selecionar Pasta
+                </button>
+                <button onclick="limparResultado()" id="btnLimpar">
+                    🗑️ Limpar
+                </button>
+            </div>
+            
+            <div id="status" class="status"></div>
+            <div id="resultado"></div>
+        </div>
+
+        <script>
+            // Estado da aplicação
+            let arquivosCarregados = [];
+            let conteudoAtual = null;
+            
+            // Função para mostrar status
+            function mostrarStatus(mensagem, tipo = 'info') {
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = mensagem;
+                statusEl.className = `status ${tipo}`;
+                statusEl.style.display = 'block';
+                
+                // Auto-hide após 3 segundos para mensagens de sucesso
+                if (tipo === 'success') {
+                    setTimeout(() => {
+                        statusEl.style.display = 'none';
+                    }, 3000);
+                }
+            }
+            
+            // Função para abrir pasta no Android
+            function abrirPastaAndroid() {
+                try {
+                    mostrarStatus('Abrindo seletor de pasta...', 'info');
+                    
+                    if (window.Android && window.Android.abrirPasta) {
+                        window.Android.abrirPasta();
+                    } else {
+                        // Fallback para teste em navegador
+                        mostrarStatus('Interface Android não encontrada. Simulando arquivos para teste...', 'error');
+                        setTimeout(() => {
+                            const arquivosTeste = ["documento.txt", "dados.json", "config.xml", "readme.md"];
+                            receberArquivos(JSON.stringify(arquivosTeste));
+                        }, 1000);
+                    }
+                } catch (error) {
+                    mostrarStatus('Erro ao abrir pasta: ' + error.message, 'error');
+                }
+            }
+            
+            // Função chamada pelo Android para receber lista de arquivos
+            function receberArquivos(arquivosJson) {
+                try {
+                    const arquivos = JSON.parse(arquivosJson);
+                    arquivosCarregados = arquivos;
+                    
+                    if (arquivos.length === 0) {
+                        mostrarStatus('Nenhum arquivo encontrado na pasta selecionada.', 'info');
+                        document.getElementById('resultado').innerHTML = '';
+                        return;
+                    }
+                    
+                    mostrarStatus(`${arquivos.length} arquivo(s) encontrado(s)!`, 'success');
+                    
+                    let listaHtml = '<ul class="file-list">';
+                    arquivos.forEach(nome => {
+                        listaHtml += `<li class="file-item" onclick="lerArquivo('${nome}')" data-file="${nome}">
+                            <span>${nome}</span>
+                        </li>`;
+                    });
+                    listaHtml += '</ul>';
+                    
+                    document.getElementById('resultado').innerHTML = listaHtml;
+                } catch (error) {
+                    mostrarStatus('Erro ao processar lista de arquivos: ' + error.message, 'error');
+                }
+            }
+            
+            // Função para ler arquivo específico
+            function lerArquivo(nome) {
+                try {
+                    // Adicionar indicador de carregamento
+                    const fileItem = document.querySelector(`[data-file="${nome}"]`);
+                    if (fileItem) {
+                        fileItem.classList.add('loading');
+                    }
+                    
+                    mostrarStatus(`Lendo arquivo: ${nome}...`, 'info');
+                    
+                    if (window.Android && window.Android.lerArquivo) {
+                        window.Android.lerArquivo(nome);
+                    } else {
+                        // Fallback para teste em navegador
+                        setTimeout(() => {
+                            const conteudoTeste = `Conteúdo simulado do arquivo: ${nome}\n\nEste é um exemplo de conteúdo que seria lido do arquivo selecionado.\n\nLinhas adicionais para demonstrar o layout...`;
+                            mostrarConteudo(conteudoTeste, nome);
+                        }, 1000);
+                    }
+                } catch (error) {
+                    mostrarStatus('Erro ao ler arquivo: ' + error.message, 'error');
+                    // Remover indicador de carregamento
+                    const fileItem = document.querySelector(`[data-file="${nome}"]`);
+                    if (fileItem) {
+                        fileItem.classList.remove('loading');
+                    }
+                }
+            }
+            
+            // Função chamada pelo Android para mostrar conteúdo
+            function mostrarConteudo(conteudo, nomeArquivo = 'arquivo') {
+                try {
+                    // Remover indicadores de carregamento
+                    document.querySelectorAll('.file-item.loading').forEach(item => {
+                        item.classList.remove('loading');
+                    });
+                    
+                    conteudoAtual = { conteudo, nome: nomeArquivo };
+                    
+                    mostrarStatus(`Arquivo "${nomeArquivo}" carregado com sucesso!`, 'success');
+                    
+                    const htmlConteudo = `
+                        <button class="back-button" onclick="voltarParaLista()">
+                            ← Voltar para lista
+                        </button>
+                        <h3>📄 ${nomeArquivo}</h3>
+                        <div class="file-content">${escapeHtml(conteudo)}</div>
+                    `;
+                    
+                    document.getElementById('resultado').innerHTML = htmlConteudo;
+                } catch (error) {
+                    mostrarStatus('Erro ao exibir conteúdo: ' + error.message, 'error');
+                }
+            }
+            
+            // Função para voltar à lista de arquivos
+            function voltarParaLista() {
+                if (arquivosCarregados.length > 0) {
+                    receberArquivos(JSON.stringify(arquivosCarregados));
+                } else {
+                    limparResultado();
+                }
+            }
+            
+            // Função para limpar resultado
+            function limparResultado() {
+                document.getElementById('resultado').innerHTML = '';
+                document.getElementById('status').style.display = 'none';
+                arquivosCarregados = [];
+                conteudoAtual = null;
+                mostrarStatus('Resultado limpo.', 'info');
+            }
+            
+            // Função utilitária para escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            // Tratamento de erros globais
+            window.addEventListener('error', function(e) {
+                mostrarStatus('Erro inesperado: ' + e.message, 'error');
+            });
+            
+            // Inicialização
+            document.addEventListener('DOMContentLoaded', function() {
+                mostrarStatus('Aplicação carregada. Clique em "Selecionar Pasta" para começar.', 'info');
+            });
+        </script>
+    </body>
+</html>

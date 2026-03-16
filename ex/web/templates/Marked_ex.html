@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Marked.js com Classes</title>
+	<script src="../js/marked.min.js"></script>
+	<style>
+		.custom-class { color: red;
+		font-weight: bold;
+		}
+	</style>
+</head>
+<body>
+
+	<textarea id="markdown-input" rows="5" cols="50">
+		Este é um parágrafo {.custom-class}
+	</textarea>
+
+	<button onclick="convertMarkdown()">Converter</button>
+
+	<div id="output">
+
+
+	</div>
+
+	<script type="module">
+		function convertMarkdown(texto = null) {
+		const renderer = new marked.Renderer();
+
+		renderer.paragraph = (text) => {
+		text = String(text); // Garante que text seja uma string
+
+		const match = text.match(/\{\.(.*?)\}$/);
+		if (match) {
+		const className = match[1];
+		text = text.replace(/\{\..*?\}$/, ""); // Remove a marcação do texto
+		return `<p class="${className}">${text}</p>`;
+		}
+		return `<p>${text}</p>`;
+		};
+
+		if (!texto){
+		const markdownText = document.getElementById("markdown-input").value;
+		} else {
+		const markdownText = texto
+		}
+
+		const html = marked.parse(markdownText, { renderer });
+		console.log(html)
+		document.getElementById("output").innerHTML = html;
+		}
+
+		convertMarkdown("Este é um parágrafo {.custom-class}")
+	</script>
+
+</body>
+</html>

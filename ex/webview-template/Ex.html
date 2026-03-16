@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en" style="background: #1a1a2e; margin: 0; padding: 0;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <title>Git Off</title>
+    <style>
+        html {
+            background-color: #1a1a2e !important;
+            background: linear-gradient(135deg, #1a1a2e, #16213e) !important;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e !important;
+            background: linear-gradient(135deg, #1a1a2e, #16213e) !important;
+            color: #fff !important;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f3460, #533483);
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: transparent;
+            min-height: calc(100vh - 200px);
+        }
+
+        .controls {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            padding: 12px 24px;
+            color: white;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-section {
+            margin: 1rem 0;
+            text-align: center;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .input-section.active {
+            opacity: 1;
+            max-height: 100px;
+            padding: 1rem 0;
+        }
+
+        .text-input {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        .text-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .file-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .file-list h2 {
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+            font-size: 1.5rem;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            border-left-color: #4ecdc4;
+        }
+
+        .file-icon {
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 80px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-title {
+            color: #4ecdc4;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 107, 107, 0.2);
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .file-content {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .file-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .file-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .file-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>git off</h1>
+        <div class="controls">
+            <button class="btn" onclick="toggleInput()">Add New File</button>
+            <div class="input-section" id="inputSection">
+                <input type="text" class="text-input" placeholder="Enter file name..." id="fileInput">
+                <button class="btn" onclick="addFile()" style="margin-left: 10px;">Add</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="file-list">
+            <h2>📁 Files</h2>
+            <div id="fileList">
+                <div class="file-item" onclick="openFile('main.js')">
+                    <span class="file-icon">📄</span>
+                    <span>main.js</span>
+                </div>
+                <div class="file-item" onclick="openFile('config.json')">
+                    <span class="file-icon">⚙️</span>
+                    <span>config.json</span>
+                </div>
+                <div class="file-item" onclick="openFile('README.md')">
+                    <span class="file-icon">📖</span>
+                    <span>README.md</span>
+                </div>
+                <div class="file-item" onclick="openFile('styles.css')">
+                    <span class="file-icon">🎨</span>
+                    <span>styles.css</span>
+                </div>
+                <div class="file-item" onclick="openFile('data.txt')">
+                    <span class="file-icon">📋</span>
+                    <span>data.txt</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="fileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">File Content</h3>
+            </div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="file-content" id="fileContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Force dark background on load
+        document.documentElement.style.backgroundColor = '#1a1a2e';
+        document.body.style.backgroundColor = '#1a1a2e';
+        
+        const fileContents = {
+            'main.js': `// Main application entry point
+function initApp() {
+    console.log('Initializing git off application...');
+    
+    // Setup event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        loadConfiguration();
+        initializeUI();
+        bindEvents();
+    });
+}
+
+function loadConfiguration() {
+    // Load app configuration
+    const config = {
+        theme: 'dark',
+        language: 'en',
+        debug: true
+    };
+    
+    return config;
+}
+
+function initializeUI() {
+    // Initialize user interface components
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    if (sidebar && mainContent) {
+        console.log('UI components initialized successfully');
+    }
+}
+
+function bindEvents() {
+    // Bind application events
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('keydown', handleKeyboard);
+}
+
+function handleResize() {
+    // Handle window resize events
+    console.log('Window resized');
+}
+
+function handleKeyboard(event) {
+    // Handle keyboard shortcuts
+    if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        console.log('Save shortcut triggered');
+    }
+}
+
+// Initialize the application
+initApp();`,
+
+            'config.json': `{
+  "application": {
+    "name": "git off",
+    "version": "1.0.0",
+    "description": "A modern file management interface",
+    "author": "Developer"
+  },
+  "settings": {
+    "theme": {
+      "default": "dark",
+      "available": ["dark", "light", "auto"]
+    },
+    "interface": {
+      "animations": true,
+      "shortcuts": true,
+      "tooltips": true
+    },
+    "performance": {
+      "lazyLoad": true,
+      "cacheFiles": true,
+      "maxFileSize": "10MB"
+    }
+  },
+  "features": {
+    "fileViewer": true,
+    "textEditor": true,
+    "searchFunction": true,
+    "filterOptions": true
+  },
+  "api": {
+    "endpoints": {
+      "files": "/api/files",
+      "upload": "/api/upload",
+      "download": "/api/download"
+    },
+    "timeout": 30000,
+    "retries": 3
+  },
+  "logging": {
+    "level": "info",
+    "file": "app.log",
+    "maxSize": "100MB"
+  }
+}`,
+
+            'README.md': `# Git Off
+
+A modern, sleek file management interface with a beautiful dark theme and smooth animations.
+
+## Features
+
+- **Intuitive Interface**: Clean and modern design with smooth animations
+- **File Management**: Easy file browsing and viewing capabilities
+- **Responsive Design**: Works perfectly on all device sizes
+- **Dark Theme**: Eye-friendly dark interface with vibrant accents
+- **Modal Windows**: Popup windows for detailed file viewing
+- **Interactive Elements**: Hover effects and smooth transitions
+
+## Getting Started
+
+1. Clone the repository
+2. Open index.html in your browser
+3. Start exploring files!
+
+## File Structure
+
+\`\`\`
+git-off/
+├── index.html          # Main HTML file
+├── styles.css          # Stylesheet
+├── main.js            # Main JavaScript
+├── config.json        # Configuration
+└── README.md          # Documentation
+\`\`\`
+
+## Usage
+
+- Click the "Add New File" button to add files to the list
+- Click on any file in the list to view its contents
+- Use the close button (×) to close file viewers
+- Enjoy the smooth animations and modern interface!
+
+## Customization
+
+You can customize the appearance by modifying the CSS variables:
+
+\`\`\`css
+:root {
+  --primary-color: #667eea;
+  --secondary-color: #4ecdc4;
+  --background: #1a1a2e;
+}
+\`\`\`
+
+## Browser Support
+
+- Chrome 60+
+- Firefox 55+
+- Safari 12+
+- Edge 79+
+
+## Contributing
+
+Feel free to submit issues and enhancement requests!
+
+## License
+
+MIT License - feel free to use this project however you'd like.`,
+
+            'styles.css': `/* Git Off - Modern File Interface Styles */
+
+:root {
+  --primary-gradient: linear-gradient(45deg, #667eea, #764ba2);
+  --secondary-gradient: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  --bg-gradient: linear-gradient(135deg, #1a1a2e, #16213e);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --accent-color: #4ecdc4;
+  --danger-color: #ff6b6b;
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .modal-content {
+    width: 95%;
+    height: 80%;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .text-input {
+    width: 250px;
+  }
+}`,
+
+            'data.txt': `Git Off Application Data
+========================
+
+User Sessions:
+- Session 1: 2024-01-15 14:23:45 - User browsed 12 files
+- Session 2: 2024-01-15 15:17:32 - User added 3 new files
+- Session 3: 2024-01-15 16:42:18 - User viewed README.md for 5 minutes
+
+Recent Files:
+1. main.js (Last modified: 2024-01-15 14:30:22)
+2. config.json (Last modified: 2024-01-15 14:25:15)
+3. styles.css (Last modified: 2024-01-15 14:35:45)
+4. README.md (Last modified: 2024-01-15 14:20:10)
+5. data.txt (Last modified: 2024-01-15 14:40:33)
+
+System Information:
+- Browser: Chrome 119.0
+- Screen Resolution: 1920x1080
+- Operating System: Windows 10
+- Available Memory: 8GB
+- Storage Used: 2.3MB
+
+Performance Metrics:
+- Average Load Time: 1.2s
+- File Open Speed: 0.3s
+- Animation Frame Rate: 60fps
+- Memory Usage: 45MB
+- CPU Usage: 12%
+
+Application Statistics:
+- Total Files: 25
+- Total Views: 147
+- Average Session Duration: 8.5 minutes
+- User Satisfaction: 9.2/10
+- Feature Usage:
+  * File Viewer: 89%
+  * Add File: 34%
+  * Modal Windows: 67%
+  * Search Function: 23%
+
+Error Log:
+[2024-01-15 14:25:30] INFO: Application started successfully
+[2024-01-15 14:30:15] INFO: File main.js opened
+[2024-01-15 14:35:22] INFO: New file added: test.js
+[2024-01-15 14:40:10] INFO: Modal window opened for config.json
+[2024-01-15 14:45:33] INFO: Session ended gracefully
+
+Configuration Settings:
+- Theme: Dark Mode
+- Animations: Enabled
+- Auto-save: Disabled
+- File Caching: Enabled
+- Debug Mode: False
+- Max File Size: 10MB
+- Backup Frequency: Daily
+
+Network Activity:
+- API Calls Made: 23
+- Data Transferred: 1.2MB
+- Average Response Time: 245ms
+- Successful Requests: 100%
+- Failed Requests: 0%
+
+This data file contains various information about the Git Off application usage, performance metrics, and system information for monitoring and analysis purposes.`
+        };
+
+        function toggleInput() {
+            const inputSection = document.getElementById('inputSection');
+            inputSection.classList.toggle('active');
+            
+            if (inputSection.classList.contains('active')) {
+                document.getElementById('fileInput').focus();
+            }
+        }
+
+        function addFile() {
+            const fileInput = document.getElementById('fileInput');
+            const fileName = fileInput.value.trim();
+            
+            if (fileName) {
+                const fileList = document.getElementById('fileList');
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.onclick = () => openFile(fileName);
+                
+                const icon = getFileIcon(fileName);
+                fileItem.innerHTML = `
+                    <span class="file-icon">${icon}</span>
+                    <span>${fileName}</span>
+                `;
+                
+                fileList.appendChild(fileItem);
+                fileInput.value = '';
+                
+                // Add sample content for new files
+                fileContents[fileName] = `// ${fileName}
+// This is a new file created by the user
+
+console.log('File ${fileName} has been created!');
+
+// Add your content here...
+
+/*
+ * File: ${fileName}
+ * Created: ${new Date().toLocaleString()}
+ * Author: User
+ * Description: A new file added through the Git Off interface
+ */
+
+function main() {
+    // Your code here
+}
+
+main();`;
+                
+                document.getElementById('inputSection').classList.remove('active');
+            }
+        }
+
+        function getFileIcon(fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            const iconMap = {
+                'js': '📄',
+                'json': '⚙️',
+                'md': '📖',
+                'css': '🎨',
+                'txt': '📋',
+                'html': '🌐',
+                'py': '🐍',
+                'java': '☕',
+                'cpp': '⚡',
+                'php': '🐘'
+            };
+            
+            return iconMap[extension] || '📄';
+        }
+
+        function openFile(fileName) {
+            const modal = document.getElementById('fileModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const fileContent = document.getElementById('fileContent');
+            
+            modalTitle.textContent = fileName;
+            fileContent.textContent = fileContents[fileName] || 'File content not available.';
+            
+            modal.style.display = 'block';
+            
+            // Add fade in animation
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.opacity = '1';
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('fileModal');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('fileModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Add enter key support for input
+        document.getElementById('fileInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addFile();
+            }
+        });
+
+        // Ensure dark background is maintained
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.style.backgroundColor = '#1a1a2e';
+            document.body.style.backgroundColor = '#1a1a2e';
+        });
+
+        // Force background color on window load
+        window.addEventListener('load', function() {
+            document.documentElement.style.backgroundColor = '#1a1a2e';
+            document.body.style.backgroundColor = '#1a1a2e';
+        });
+    </script>
+</body>
+</html>

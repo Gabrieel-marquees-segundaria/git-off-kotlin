@@ -1,0 +1,1 @@
+export const cookies_name = "repository";

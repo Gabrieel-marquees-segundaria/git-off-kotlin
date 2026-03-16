@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./.ignore/css/style.css" />
+
+    <title class="name">REPOSITORY</title>
+  </head>
+  <body>
+    <header>
+      <div id="top">
+        <svg
+          id="icon"
+          height="32"
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          version="1.1"
+          width="32"
+          data-view-component="true"
+          class="octicon octicon-mark-github v-align-middle"
+        >
+          <path
+            d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"
+          ></path>
+        </svg>
+        <h3 style="font-weight: 400">
+          <a id="home-link" href="/">Gabrieel marques nascimento</a>/<span
+            style="font-weight: 900"
+            class="name"
+            >repository</span
+          >
+        </h3>
+        <input type="text" />
+        <button>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80">
+            <!-- Três linhas horizontais formando o ícone de menu -->
+            <rect width="100" height="12" rx="8" fill="#ffff" />
+            <rect y="34" width="100" height="12" rx="8" fill="#ffff" />
+            <rect y="68" width="100" height="12" rx="8" fill="#ffff" />
+          </svg>
+        </button>
+      </div>
+      <div id="bottom"></div>
+    </header>
+    <main>
+      <style>
+        main {
+          position: relative;
+          display: flex;
+          flex-direction: row;
+          height: 100dvh;
+        }
+        #profile {
+          flex-wrap: wrap;
+          display: flex;
+          flex-direction: column;
+          padding: 10px;
+          padding-top: 20px;
+
+          align-content: flex-end;
+          width: 25%;
+          height: 100%;
+          border: 0.5px solid rgb(255, 255, 255);
+        }
+
+        #repo {
+          position: relative;
+          padding: 10px;
+          padding-top: 5px;
+          width: 80%;
+          height: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        #repo > #header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          column-gap: 10px;
+
+          padding: 10px;
+          padding-top: 5px;
+          padding-bottom: 5px;
+          border-bottom: 1px solid rgb(255, 255, 255);
+        }
+
+        #repo > #header > h3 {
+          overflow: scroll;
+        }
+        #repo > #header > input {
+          width: 50vw;
+          margin: 2px;
+          margin-left: auto;
+        }
+        #repo > #main {
+          width: 100%;
+          height: 100%;
+          padding: 10px;
+        }
+        #repo > #main > ul {
+          overflow-y: scroll;
+          width: 100%;
+          height: 100%;
+        }
+        #repo > #main > ul::-webkit-scrollbar {
+          width: 10px;
+        }
+        #repo > #main > ul > li {
+          width: 100%;
+          height: 40px;
+          background-color: #0f141b;
+          border-bottom: 0.5px solid rgb(63, 59, 59);
+        }
+        input {
+          font-size: 14px;
+        }
+        .name {
+          white-space: nowrap;
+        }
+
+        .buttons-container {
+          display: flex;
+          gap: 10px;
+          /* espaçamento entre os botões */
+          flex-wrap: nowrap;
+          /* permite quebra de linha em telas menores */
+          align-items: center;
+        }
+        .path {
+          background-color: #0f141b00;
+          color: white;
+          font-size: 0.8em;
+          text-transform: capitalize;
+        }
+
+        .path {
+          background-color: transparent;
+          border: 2px solid white;
+          color: white;
+          /* padding: 10px 20px; */
+          padding: 5px;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: capitalize;
+        }
+
+        .path:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      </style>
+      <div id="repo">
+        <div id="header">
+          <div class="buttons-container" id="name-link">path/file</div>
+          <input type="text" />
+        </div>
+        <div id="main">
+          <ul id="files"></ul>
+        </div>
+      </div>
+    </main>
+
+    <script src="../js/eventos.js"></script>
+    <script src="../js/socket.io.js"></script>
+    <script src="../js/marked-v9.1.6.min.js"></script>
+    <script type="module" src="../js/utils.js"></script>
+    <script type="module">
+      import {
+        includesAll,
+        cookies_name,
+        aplicarHighlight,
+        popup,
+        socket,
+        endsWithAll,
+        requestTypePath,
+      } from "./js/utils.js";
+
+      function atualizarHighlight() {
+        if (typeof hljs !== "undefined") {
+          hljs.highlightAll();
+        }
+      }
+      // const socket = io()
+      const repository = String(localStorage.getItem(cookies_name));
+      if (localStorage.getItem(cookies_name) == null || repository == "") {
+        window.location.href = "/";
+      } else {
+        // popup(cookies_name);
+
+        const repository = String(localStorage.getItem("repository"));
+        requestTypePath(repository);
+      }
+      const mainId = document.getElementById("main");
+      const ul = document.getElementById("files");
+
+      document.querySelectorAll(".name").forEach((element) => {
+        element.textContent = repository;
+      });
+      //document.getElementById("name-link").te
+      const path_elm = document.getElementById("name-link");
+      path_elm.textContent = "";
+      console.log(repository.split("/"));
+      const $path = document.createElement("button");
+      $path.classList.add("path");
+      let cont = "";
+      const repoList = repository.split("/");
+
+      repoList.forEach((path, index) => {
+        console.log(repository.slice(repository.indexOf(path) + path.length));
+        let clone = $path.cloneNode(true);
+        clone.textContent = "/" + path;
+
+        clone.addEventListener("click", () => {
+          console.log(repository.slice(0, repository.indexOf(path)));
+          localStorage.setItem(
+            cookies_name,
+            repository.slice(0, repository.indexOf(path) + path.length)
+          );
+          if (repoList.length == 1) {
+            localStorage.removeItem(cookies_name);
+            window.location.href = "/";
+            return;
+          }
+          window.location.href = cookies_name;
+        });
+
+        path_elm.appendChild(clone);
+      });
+
+      function createList(list) {
+        const ul = document.getElementById("files");
+        try {
+          while (ul.firstChild) {
+            ul.removeChild(ul.firstChild);
+          }
+        } catch (e) {}
+        const repo = document.createElement("li");
+
+        list.forEach((text) => {
+          const clone = repo.cloneNode(true);
+          clone.textContent = text;
+          clone.addEventListener("click", () => {
+            if (text.includes(".")) {
+              localStorage.setItem(cookies_name, repository + "/" + text);
+              requestTypePath(repository + "/" + text);
+              //socket.emit("read_file", { name: repository+"/"+ text });
+            } else {
+              localStorage.setItem(cookies_name, repository + "/" + text);
+              window.location.href = cookies_name;
+            }
+          });
+          ul.appendChild(clone);
+        });
+ul.appendChild(repo)
+      }
+
+      socket.emit("search_click", { repository: String(repository) });
+      socket.on("result1", (data) => {
+        //search_input
+        console.log(data);
+      });
+      socket.on("result2", (data) => {
+        // search_click
+        console.log(data);
+        createList(data["result"]);
+      });
+    </script>
+    <script src="../js/eventos.js"></script>
+  </body>
+</html>

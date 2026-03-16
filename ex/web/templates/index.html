@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>File Manager App</title>
+        <link rel="stylesheet" href="./css/styles.css" />
+    </head>
+    <body>
+        <div class="app-container">
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+            <!-- Sidebar Menu -->
+            <div class="sidebar" id="sidebar">
+                <!-- Sidebar items will be populated by JavaScript -->
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <div class="burger-menu" id="burgerMenu">
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                </div>
+
+                <div class="user-info">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-name">João Silva</div>
+                </div>
+
+                <button id="filterButton">Filter</button>
+                <div id="filterMenu" style="display: none;">
+<!--                     <button>Opção 1</button>
+<button>Opção 2</button>
+<button>Opção 3</button> -->
+                </div>
+
+                <div class="search-container">
+                    <input
+                        type="text"
+                        class="search-bar"
+                        placeholder="Buscar contatos..."
+                        id="searchInput"
+                    />
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="content-header">
+                    <h1 class="content-title">Lista de Arquivos</h1>
+                    <p class="content-subtitle">
+                        Gerencie seus arquivo de forma inteligente
+                    </p>
+                </div>
+
+                <div class="names-grid" id="namesGrid">
+                    <!-- Files will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <script src="/js/socket.io.js"></script>
+        <script type="module" src="./js/main/data.js"></script>
+        <script type="module" src="./js/main/components.js"></script>
+<!--         <script type="module" src="./js/main/app.js"></script> -->
+        <script type="module" src="./js/main/script.js"></script>
+
+        <script>
+            document.getElementById('filterButton').addEventListener('click', function() {
+                const menu = document.getElementById('filterMenu');
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            });
+        </script>
+    </body>
+</html>

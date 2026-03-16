@@ -1,0 +1,165 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+/* Header styles */
+header {
+  width: 100%;
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
+}
+
+#top {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+#icon {
+  fill: #c9d1d9;
+}
+
+#top h3 {
+  flex-grow: 1;
+  font-size: 14px;
+  color: #c9d1d9;
+}
+
+#top input {
+  padding: 5px 12px;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  width: 240px;
+}
+
+#top button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+}
+
+#top button svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Main content styles */
+main {
+  max-width: 1280px;
+  margin: 24px auto;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 296px 1fr;
+  gap: 24px;
+}
+
+/* Profile section */
+#profile {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+#profile img {
+  width: 100%;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+#profile h3 {
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+#profile button {
+  width: 100%;
+  padding: 5px 16px;
+  background-color: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#profile button:hover {
+  background-color: #30363d;
+}
+
+/* Repository section */
+#repo {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+}
+
+#repo #header {
+  padding: 16px;
+  border-bottom: 1px solid #30363d;
+}
+
+#repo input {
+  width: 100%;
+  padding: 5px 12px;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+}
+
+#repo #main {
+  padding: 16px;
+}
+
+#repo ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+#repo li {
+  padding: 16px;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#repo li:hover {
+  background-color: #161b22;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  main {
+      grid-template-columns: 1fr;
+  }
+  #profile img {
+    width: 50%;
+    border-radius: 50%;
+    margin-bottom: 16px;
+  }
+  #top input {
+      width: 160px;
+  }
+}

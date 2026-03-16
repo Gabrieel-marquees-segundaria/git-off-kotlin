@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Git Off</title>
+    </head>
+    <body>
+        <header class="header">
+            <h1>git off</h1>
+
+            <div id="status" class="status"></div>
+        </header>
+
+        <div class="container">
+            <div class="file-list"></div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal" id="fileModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalTitle">File Content</h3>
+                    <button class="frame-button" id="frame-button">🌐</button>
+                </div>
+                <button class="close-btn">&times;</button>
+                <script>
+                    // Force dark background on load
+                    document.documentElement.style.backgroundColor = "#1a1a2e";
+                    document.body.style.backgroundColor = "#1a1a2e";
+
+                    document
+                        .querySelector(".close-btn")
+                        .addEventListener("click", () => {
+                            const modal = document.getElementById("fileModal");
+                            modal.style.display = "none";
+                        });
+                </script>
+                <div class="file-content" id="fileContent"></div>
+            </div>
+        </div>
+    </body>
+</html>

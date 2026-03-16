@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botão Arrastável</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #draggableButton {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: move;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+            z-index: 10;
+        }
+
+        #draggableButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+
+        #draggableButton:active {
+            transform: scale(0.95);
+        }
+
+        #draggableButton.dragging {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        #positionDisplay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            z-index: 20;
+        }
+
+        #instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+
+        .trail {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeOut 2s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="positionDisplay">
+        <strong>Posição do Botão:</strong><br>
+        X: <span id="xPos">100</span>px<br>
+        Y: <span id="yPos">100</span>px
+    </div>
+
+    <div id="instructions">
+        <strong>Instruções:</strong><br>
+        • Clique e arraste o botão para movê-lo<br>
+        • A posição é atualizada em tempo real<br>
+        • O botão deixa um rastro quando movido
+    </div>
+
+    <button id="draggableButton">Arraste-me! 🚀</button>
+
+    <script>
+        let isDragging = false;
+        let currentX = 100;
+        let currentY = 100;
+        let initialX = 0;
+        let initialY = 0;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        const button = document.getElementById('draggableButton');
+        const xPosDisplay = document.getElementById('xPos');
+        const yPosDisplay = document.getElementById('yPos');
+
+        function updatePosition() {
+            xPosDisplay.textContent = Math.round(currentX);
+            yPosDisplay.textContent = Math.round(currentY);
+        }
+
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'trail';
+            trail.style.left = (x + 25) + 'px';
+            trail.style.top = (y + 15) + 'px';
+            document.body.appendChild(trail);
+            
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 2000);
+        }
+
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+
+            if (e.target === button) {
+                isDragging = true;
+                button.classList.add('dragging');
+            }
+        }
+
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            button.classList.remove('dragging');
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+
+                // Limites da tela
+                const maxX = window.innerWidth - button.offsetWidth;
+                const maxY = window.innerHeight - button.offsetHeight;
+                
+                currentX = Math.max(0, Math.min(currentX, maxX));
+                currentY = Math.max(0, Math.min(currentY, maxY));
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                button.style.left = currentX + "px";
+                button.style.top = currentY + "px";
+                
+                updatePosition();
+                
+                // Criar rastro durante o arraste
+                if (Math.random() < 0.3) {
+                    createTrail(currentX, currentY);
+                }
+            }
+        }
+
+        // Event listeners para mouse
+        button.addEventListener('mousedown', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+
+        // Event listeners para touch (dispositivos móveis)
+        button.addEventListener('touchstart', dragStart);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', dragEnd);
+
+        // Inicializar posição
+        updatePosition();
+
+        // Efeito de clique no botão
+        button.addEventListener('click', function(e) {
+            if (!isDragging) {
+                button.style.animation = 'none';
+                setTimeout(() => {
+                    button.style.animation = '';
+                }, 10);
+                
+                // Criar múltiplas partículas no clique
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        createTrail(
+                            currentX + Math.random() * 50 - 25,
+                            currentY + Math.random() * 30 - 15
+                        );
+                    }, i * 50);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

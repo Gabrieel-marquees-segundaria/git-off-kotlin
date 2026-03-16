@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Comunicação Android ↔ JS</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2 id="title">📱 Leitor de Arquivos</h2>
+                <div class="search-container">
+                    <button class="search-btn" id="searchBtn" title="Pesquisar">
+                        🔍
+                    </button>
+                    <input
+                        type="text"
+                        class="search-input"
+                        id="searchInput"
+                        placeholder="Digite para pesquisar..."
+                    />
+                </div>
+            </div>
+
+            <div id="status" class="status"></div>
+            <div id="resultado"></div>
+        </div>
+        <script type="module" src="./Android/app.js"></script>
+        <script type="module" src="./settings/main.js"></script>
+        <script src="search.js"></script>
+    </body>
+</html>

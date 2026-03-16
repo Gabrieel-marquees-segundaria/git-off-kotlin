@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo Highlight.js</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+    </head>
+<body>
+    <h1>Exemplo de Destaque de Código</h1>
+
+    <pre><code class="language-javascript">
+function greet(name) {
+  console.log(`Olá, ${name}!`);
+}
+
+greet("Mundo");
+    </code></pre>
+
+    <pre><code class="language-python">
+def factorial(n):
+    if n == 0:
+        return 1
+    else:
+        return n * factorial(n-1)
+
+print(factorial(5))
+    </code></pre>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+    <script>
+        // 3. Inicializar o Highlight.js
+        // Isso encontra e destaca blocos de código dentro de <pre><code> tags
+        // e tenta detectar o idioma automaticamente.
+        hljs.highlightAll();
+
+        // Se você quiser destacar elementos específicos ou ter mais controle:
+        // document.addEventListener('DOMContentLoaded', (event) => {
+        //     document.querySelectorAll('pre code').forEach((el) => {
+        //         hljs.highlightElement(el);
+        //     });
+        // });
+    </script>
+</body>
+</html>

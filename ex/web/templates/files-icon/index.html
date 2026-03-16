@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Arquivos com Ícones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .add-file-form {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .file-list {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .file-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .file-icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-type {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .delete-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #ff5252, #e91e63);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .add-file-form {
+                min-width: auto;
+            }
+            
+            .file-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📁 Gerenciador de Arquivos</h1>
+        
+        <div class="controls">
+            <div class="add-file-form">
+                <input type="text" id="fileInput" placeholder="Digite o nome do arquivo (ex: documento.pdf)" />
+                <button onclick="addFile()">Adicionar</button>
+            </div>
+            
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterFiles('all')">Todos</button>
+                <button class="filter-btn" onclick="filterFiles('document')">Documentos</button>
+                <button class="filter-btn" onclick="filterFiles('image')">Imagens</button>
+                <button class="filter-btn" onclick="filterFiles('audio')">Áudio</button>
+                <button class="filter-btn" onclick="filterFiles('video')">Vídeo</button>
+                <button class="filter-btn" onclick="filterFiles('code')">Código</button>
+            </div>
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+    </div>
+
+    <script>
+        // Array para armazenar os arquivos
+        let files = [
+            'documento.pdf',
+            'imagem.jpg',
+            'planilha.xlsx',
+            'apresentacao.pptx',
+            'musica.mp3',
+            'video.mp4',
+            'codigo.js',
+            'texto.txt',
+            'foto.png',
+            'arquivo.zip'
+        ];
+
+        let currentFilter = 'all';
+
+        // Mapeamento de extensões para ícones e tipos
+        const fileTypeMap = {
+            // Documentos
+            'pdf': { icon: '📄', type: 'document', name: 'PDF' },
+            'doc': { icon: '📝', type: 'document', name: 'Word' },
+            'docx': { icon: '📝', type: 'document', name: 'Word' },
+            'txt': { icon: '📄', type: 'document', name: 'Texto' },
+            'rtf': { icon: '📄', type: 'document', name: 'RTF' },
+            
+            // Planilhas
+            'xlsx': { icon: '📊', type: 'document', name: 'Excel' },
+            'xls': { icon: '📊', type: 'document', name: 'Excel' },
+            'csv': { icon: '📊', type: 'document', name: 'CSV' },
+            
+            // Apresentações
+            'pptx': { icon: '📺', type: 'document', name: 'PowerPoint' },
+            'ppt': { icon: '📺', type: 'document', name: 'PowerPoint' },
+            
+            // Imagens
+            'jpg': { icon: '🖼️', type: 'image', name: 'JPEG' },
+            'jpeg': { icon: '🖼️', type: 'image', name: 'JPEG' },
+            'png': { icon: '🖼️', type: 'image', name: 'PNG' },
+            'gif': { icon: '🎞️', type: 'image', name: 'GIF' },
+            'bmp': { icon: '🖼️', type: 'image', name: 'BMP' },
+            'svg': { icon: '🎨', type: 'image', name: 'SVG' },
+            'webp': { icon: '🖼️', type: 'image', name: 'WebP' },
+            
+            // Áudio
+            'mp3': { icon: '🎵', type: 'audio', name: 'MP3' },
+            'wav': { icon: '🎵', type: 'audio', name: 'WAV' },
+            'flac': { icon: '🎵', type: 'audio', name: 'FLAC' },
+            'aac': { icon: '🎵', type: 'audio', name: 'AAC' },
+            'ogg': { icon: '🎵', type: 'audio', name: 'OGG' },
+            
+            // Vídeo
+            'mp4': { icon: '🎬', type: 'video', name: 'MP4' },
+            'avi': { icon: '🎬', type: 'video', name: 'AVI' },
+            'mkv': { icon: '🎬', type: 'video', name: 'MKV' },
+            'mov': { icon: '🎬', type: 'video', name: 'MOV' },
+            'wmv': { icon: '🎬', type: 'video', name: 'WMV' },
+            'webm': { icon: '🎬', type: 'video', name: 'WebM' },
+            
+            // Código
+            'js': { icon: '⚡', type: 'code', name: 'JavaScript' },
+            'html': { icon: '🌐', type: 'code', name: 'HTML' },
+            'css': { icon: '🎨', type: 'code', name: 'CSS' },
+            'py': { icon: '🐍', type: 'code', name: 'Python' },
+            'java': { icon: '☕', type: 'code', name: 'Java' },
+            'cpp': { icon: '⚙️', type: 'code', name: 'C++' },
+            'c': { icon: '⚙️', type: 'code', name: 'C' },
+            'php': { icon: '🐘', type: 'code', name: 'PHP' },
+            'rb': { icon: '💎', type: 'code', name: 'Ruby' },
+            'go': { icon: '🚀', type: 'code', name: 'Go' },
+            'json': { icon: '📋', type: 'code', name: 'JSON' },
+            'xml': { icon: '📋', type: 'code', name: 'XML' },
+            
+            // Compactados
+            'zip': { icon: '🗜️', type: 'archive', name: 'ZIP' },
+            'rar': { icon: '🗜️', type: 'archive', name: 'RAR' },
+            '7z': { icon: '🗜️', type: 'archive', name: '7-Zip' },
+            'tar': { icon: '🗜️', type: 'archive', name: 'TAR' },
+            
+            // Outros
+            'exe': { icon: '⚙️', type: 'executable', name: 'Executável' },
+            'apk': { icon: '📱', type: 'executable', name: 'Android' },
+            'dmg': { icon: '💿', type: 'executable', name: 'macOS' }
+        };
+
+        function getFileExtension(filename) {
+            return filename.split('.').pop().toLowerCase();
+        }
+
+        function getFileInfo(filename) {
+            const ext = getFileExtension(filename);
+            return fileTypeMap[ext] || { icon: '📁', type: 'unknown', name: 'Arquivo' };
+        }
+
+        function renderFiles() {
+            const fileList = document.getElementById('fileList');
+            const filteredFiles = currentFilter === 'all' ? 
+                files : files.filter(file => getFileInfo(file).type === currentFilter);
+
+            if (filteredFiles.length === 0) {
+                fileList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📂</div>
+                        <h3>Nenhum arquivo encontrado</h3>
+                        <p>Adicione alguns arquivos ou altere o filtro</p>
+                    </div>
+                `;
+                return;
+            }
+
+            fileList.innerHTML = filteredFiles.map((file, index) => {
+                const fileInfo = getFileInfo(file);
+                const originalIndex = files.indexOf(file);
+                
+                return `
+                    <div class="file-item" onclick="openFile('${file}')">
+                        <div class="file-icon">${fileInfo.icon}</div>
+                        <div class="file-info">
+                            <div class="file-name">${file}</div>
+                            <div class="file-type">${fileInfo.name}</div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteFile(${originalIndex}, event)">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addFile() {
+            const input = document.getElementById('fileInput');
+            const filename = input.value.trim();
+            
+            if (filename && !files.includes(filename)) {
+                files.push(filename);
+                input.value = '';
+                renderFiles();
+            } else if (files.includes(filename)) {
+                alert('Este arquivo já existe na lista!');
+            }
+        }
+
+        function deleteFile(index, event) {
+            event.stopPropagation();
+            if (confirm('Tem certeza que deseja remover este arquivo da lista?')) {
+                files.splice(index, 1);
+                renderFiles();
+            }
+        }
+
+        function openFile(filename) {
+            alert(`Abrindo: ${filename}\n\nEm uma aplicação real, isso abriria o arquivo ou executaria uma ação específica.`);
+        }
+
+        function filterFiles(type) {
+            currentFilter = type;
+            
+            // Atualizar botões ativos
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderFiles();
+        }
+
+        // Event listener para adicionar arquivo com Enter
+        document.getElementById('fileInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addFile();
+            }
+        });
+
+        // Renderizar lista inicial
+        renderFiles();
+    </script>
+</body>
+</html>

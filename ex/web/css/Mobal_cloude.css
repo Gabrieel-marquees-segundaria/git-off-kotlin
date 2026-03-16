@@ -1,0 +1,190 @@
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+}
+
+body {
+  width: 100%;
+  height: 100vh;
+  color: white;
+  background-color: #0d1117;
+  overflow-x: hidden;
+}
+
+header {
+  background-color: #010409;
+  padding: 10px;
+  border-bottom: 1px solid rgb(243, 219, 219);
+}
+
+header > div {
+  width: 100%;
+}
+
+header > #top {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 5px;
+  flex-wrap: wrap;
+}
+
+header > #top svg#icon {
+  background-color: white;
+  border-radius: 50%;
+  min-width: 40px;
+}
+
+header > #top input {
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
+}
+
+header > #top button {
+  width: 40px;
+  height: 40px;
+  background-color: rgb(7, 7, 7);
+  border: 0.5px solid rgb(255, 255, 255);
+  padding: 8px;
+}
+
+#bottom {
+  height: 30px;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: calc(100vh - 100px);
+}
+
+@media (min-width: 768px) {
+  main {
+    flex-direction: row;
+  }
+}
+
+#profile {
+  width: 100%;
+  padding: 20px;
+  border: 0.5px solid rgb(255, 255, 255);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+@media (min-width: 768px) {
+  #profile {
+    width: 25%;
+  }
+}
+
+#profile > img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+#repo {
+  width: 100%;
+  padding: 15px;
+  height: auto;
+}
+
+@media (min-width: 768px) {
+  #repo {
+    width: 75%;
+  }
+}
+
+#repo.fullscreen {
+  position: fixed;
+  z-index: 999;
+  width: 100%;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  transform: none;
+  padding: 20px;
+}
+
+#repo > #header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgb(255, 255, 255);
+}
+
+@media (min-width: 768px) {
+  #repo > #header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+#repo > #header input {
+  width: 100%;
+}
+
+.readFile {
+  height: auto;
+  max-height: 68vh;
+  overflow-y: auto;
+  padding: 15px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fullscreenbutton {
+  position: fixed;
+  right: 15px;
+  bottom: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(245, 245, 245, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}
+
+.popup button {
+  width: 100%;
+  margin: 5px 0;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+@media (min-width: 768px) {
+  .popup button {
+    width: auto;
+    min-width: 120px;
+    margin: 10px;
+  }
+}

@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu de Configurações - Exemplo</title>
+    <style>
+        /* Conteúdo de exemplo da página */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        p { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Página de Exemplo</h1>
+        <p>Este é um exemplo de página web. O menu de configurações será injetado dinamicamente via JavaScript.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </div>
+
+    <script>
+    // Menu de Configurações Injetável
+    (function() {
+        'use strict';
+        
+        // Verificar se já existe para evitar duplicação
+        if (document.getElementById('floatingConfigMenu')) {
+            return;
+        }
+
+        // Criar container principal do menu
+        const menuContainer = document.createElement('div');
+        menuContainer.id = 'floatingConfigMenu';
+        
+        // Estilos CSS do menu
+        const menuStyles = `
+            #floatingConfigMenu {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 999999;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 14px;
+                user-select: none;
+            }
+            
+            .config-menu-button {
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                color: white;
+                font-size: 18px;
+            }
+            
+            .config-menu-button:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            }
+            
+            .config-menu-panel {
+                position: absolute;
+                top: 60px;
+                right: 0;
+                width: 280px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-10px);
+                transition: all 0.3s ease;
+                overflow: hidden;
+            }
+            
+            .config-menu-panel.active {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+            
+            .config-menu-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                font-weight: 600;
+                font-size: 16px;
+            }
+            
+            .config-menu-content {
+                padding: 20px;
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            
+            .config-section {
+                margin-bottom: 25px;
+            }
+            
+            .config-section:last-child {
+                margin-bottom: 0;
+            }
+            
+            .config-section-title {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 12px;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            
+            .config-option {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .config-option:last-child {
+                border-bottom: none;
+            }
+            
+            .config-label {
+                color: #555;
+                font-size: 14px;
+            }
+            
+            .config-toggle {
+                position: relative;
+                width: 44px;
+                height: 24px;
+                background: #ddd;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+            
+            .config-toggle.active {
+                background: #667eea;
+            }
+            
+            .config-toggle::after {
+                content: '';
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 20px;
+                height: 20px;
+                background: white;
+                border-radius: 50%;
+                transition: transform 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            
+            .config-toggle.active::after {
+                transform: translateX(20px);
+            }
+            
+            .config-select {
+                padding: 6px 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background: white;
+                font-size: 12px;
+                cursor: pointer;
+                outline: none;
+            }
+            
+            .config-select:focus {
+                border-color: #667eea;
+            }
+            
+            .config-range {
+                width: 80px;
+                height: 4px;
+                background: #ddd;
+                border-radius: 2px;
+                outline: none;
+                cursor: pointer;
+            }
+            
+            .config-range::-webkit-slider-thumb {
+                appearance: none;
+                width: 16px;
+                height: 16px;
+                background: #667eea;
+                border-radius: 50%;
+                cursor: pointer;
+            }
+            
+            .config-range::-moz-range-thumb {
+                width: 16px;
+                height: 16px;
+                background: #667eea;
+                border-radius: 50%;
+                cursor: pointer;
+                border: none;
+            }
+            
+            .config-actions {
+                padding: 15px 20px;
+                background: #f8f9fa;
+                display: flex;
+                gap: 10px;
+            }
+            
+            .config-btn {
+                flex: 1;
+                padding: 8px 16px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background: white;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.2s ease;
+            }
+            
+            .config-btn:hover {
+                background: #f0f0f0;
+            }
+            
+            .config-btn.primary {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+            
+            .config-btn.primary:hover {
+                background: #5a6fd8;
+            }
+            
+            .code-editor-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 1000000;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            
+            .code-editor-container {
+                background: #1e1e1e;
+                border-radius: 12px;
+                width: 90%;
+                max-width: 1200px;
+                height: 80%;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            }
+            
+            .code-editor-header {
+                background: #2d2d2d;
+                color: white;
+                padding: 15px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #404040;
+            }
+            
+            .code-editor-title {
+                font-weight: 600;
+                font-size: 16px;
+            }
+            
+            .code-editor-controls {
+                display: flex;
+                gap: 10px;
+            }
+            
+            .code-editor-btn {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.2s ease;
+            }
+            
+            .code-editor-btn.save {
+                background: #4CAF50;
+                color: white;
+            }
+            
+            .code-editor-btn.cancel {
+                background: #f44336;
+                color: white;
+            }
+            
+            .code-editor-btn.reset {
+                background: #ff9800;
+                color: white;
+            }
+            
+            .code-editor-btn:hover {
+                opacity: 0.8;
+            }
+            
+            .code-editor-content {
+                flex: 1;
+                display: flex;
+            }
+            
+            .code-editor-sidebar {
+                width: 200px;
+                background: #252526;
+                border-right: 1px solid #404040;
+                padding: 10px;
+                overflow-y: auto;
+            }
+            
+            .code-editor-file {
+                color: #cccccc;
+                padding: 8px 12px;
+                cursor: pointer;
+                border-radius: 4px;
+                font-size: 12px;
+                margin-bottom: 2px;
+                transition: background 0.2s ease;
+            }
+            
+            .code-editor-file:hover {
+                background: #2a2d2e;
+            }
+            
+            .code-editor-file.active {
+                background: #094771;
+                color: white;
+            }
+            
+            .code-editor-main {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .code-editor-tabs {
+                background: #2d2d2d;
+                border-bottom: 1px solid #404040;
+                padding: 0 10px;
+                display: flex;
+                align-items: center;
+                min-height: 35px;
+            }
+            
+            .code-editor-tab {
+                background: #1e1e1e;
+                color: #cccccc;
+                padding: 8px 16px;
+                border-radius: 4px 4px 0 0;
+                font-size: 12px;
+                cursor: pointer;
+                margin-right: 2px;
+            }
+            
+            .code-editor-tab.active {
+                background: #1e1e1e;
+                color: white;
+            }
+            
+            .code-editor-textarea {
+                flex: 1;
+                background: #1e1e1e;
+                color: #d4d4d4;
+                border: none;
+                padding: 20px;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                font-size: 14px;
+                line-height: 1.5;
+                resize: none;
+                outline: none;
+                tab-size: 4;
+                white-space: pre;
+                overflow-wrap: normal;
+                overflow-x: auto;
+            }
+            
+            .code-editor-footer {
+                background: #007acc;
+                color: white;
+                padding: 8px 20px;
+                font-size: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .code-editor-status {
+                display: flex;
+                gap: 20px;
+            }
+            
+            @media (max-width: 480px) {
+                #floatingConfigMenu {
+                    top: 10px;
+                    right: 10px;
+                }
+                
+                .config-menu-panel {
+                    width: calc(100vw - 40px);
+                    right: -10px;
+                }
+            }
+        `;
+        
+        // Adicionar estilos ao head
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = menuStyles;
+        document.head.appendChild(styleSheet);
+        
+        // HTML do menu
+        menuContainer.innerHTML = `
+            <button class="config-menu-button" title="Configurações">
+                ⚙️
+            </button>
+            
+            <div class="config-menu-panel">
+                <div class="config-menu-header">
+                    Configurações
+                </div>
+                
+                <div class="config-menu-content">
+                    <div class="config-section">
+                        <div class="config-section-title">Aparência</div>
+                        <div class="config-option">
+                            <span class="config-label">Modo Escuro</span>
+                            <div class="config-toggle" data-setting="darkMode"></div>
+                        </div>
+                        <div class="config-option">
+                            <span class="config-label">Tema</span>
+                            <select class="config-select" data-setting="theme">
+                                <option value="default">Padrão</option>
+                                <option value="blue">Azul</option>
+                                <option value="green">Verde</option>
+                                <option value="purple">Roxo</option>
+                            </select>
+                        </div>
+                        <div class="config-option">
+                            <span class="config-label">Opacidade</span>
+                            <input type="range" class="config-range" min="0.5" max="1" step="0.1" value="1" data-setting="opacity">
+                        </div>
+                    </div>
+                    
+                    <div class="config-section">
+                        <div class="config-section-title">Funcionalidades</div>
+                        <div class="config-option">
+                            <span class="config-label">Notificações</span>
+                            <div class="config-toggle active" data-setting="notifications"></div>
+                        </div>
+                        <div class="config-option">
+                            <span class="config-label">Auto-save</span>
+                            <div class="config-toggle active" data-setting="autosave"></div>
+                        </div>
+                        <div class="config-option">
+                            <span class="config-label">Som</span>
+                            <div class="config-toggle" data-setting="sound"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="config-section">
+                        <div class="config-section-title">Performance</div>
+                        <div class="config-option">
+                            <span class="config-label">Animações</span>
+                            <div class="config-toggle active" data-setting="animations"></div>
+                        </div>
+                        <div class="config-option">
+                            <span class="config-label">Cache</span>
+                            <div class="config-toggle active" data-setting="cache"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="config-section">
+                        <div class="config-section-title">Desenvolvedor</div>
+                        <div class="config-option">
+                            <span class="config-label">Editor de Código</span>
+                            <button class="config-btn primary" data-action="openEditor">Abrir Editor</button>
+                        </div>
+                        <div class="config-option">
+                            <span class="config-label">Exportar Config</span>
+                            <button class="config-btn" data-action="export">Exportar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-actions">
+                    <button class="config-btn" data-action="reset">Resetar</button>
+                    <button class="config-btn primary" data-action="save">Salvar</button>
+                </div>
+            </div>
+        `;
+        
+        // Adicionar ao body
+        document.body.appendChild(menuContainer);
+        
+        // Criar editor de código
+        const editorOverlay = document.createElement('div');
+        editorOverlay.className = 'code-editor-overlay';
+        editorOverlay.innerHTML = `
+            <div class="code-editor-container">
+                <div class="code-editor-header">
+                    <div class="code-editor-title">🔧 Editor de Código - Menu de Configurações</div>
+                    <div class="code-editor-controls">
+                        <button class="code-editor-btn save">💾 Salvar & Aplicar</button>
+                        <button class="code-editor-btn reset">🔄 Resetar</button>
+                        <button class="code-editor-btn cancel">❌ Fechar</button>
+                    </div>
+                </div>
+                
+                <div class="code-editor-content">
+                    <div class="code-editor-sidebar">
+                        <div class="code-editor-file active" data-file="main">📄 main.js</div>
+                        <div class="code-editor-file" data-file="styles">🎨 styles.css</div>
+                        <div class="code-editor-file" data-file="settings">⚙️ settings.json</div>
+                    </div>
+                    
+                    <div class="code-editor-main">
+                        <div class="code-editor-tabs">
+                            <div class="code-editor-tab active">main.js</div>
+                        </div>
+                        
+                        <textarea class="code-editor-textarea" spellcheck="false"></textarea>
+                        
+                        <div class="code-editor-footer">
+                            <div class="code-editor-status">
+                                <span>Linhas: <span class="line-count">0</span></span>
+                                <span>Caracteres: <span class="char-count">0</span></span>
+                            </div>
+                            <div>JavaScript - UTF-8</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(editorOverlay);
+        
+        // Configurações em memória (declarar primeiro)
+        let settings = {
+            darkMode: false,
+            theme: 'default',
+            opacity: 1,
+            notifications: true,
+            autosave: true,
+            sound: false,
+            animations: true,
+            cache: true
+        };
+        
+        // Funcionalidades JavaScript
+        const menuButton = menuContainer.querySelector('.config-menu-button');
+        const menuPanel = menuContainer.querySelector('.config-menu-panel');
+        const toggles = menuContainer.querySelectorAll('.config-toggle');
+        const selects = menuContainer.querySelectorAll('.config-select');
+        const ranges = menuContainer.querySelectorAll('.config-range');
+        const buttons = menuContainer.querySelectorAll('.config-btn');
+        
+        // Elementos do editor
+        const codeEditorTextarea = editorOverlay.querySelector('.code-editor-textarea');
+        const editorFiles = editorOverlay.querySelectorAll('.code-editor-file');
+        const editorButtons = editorOverlay.querySelectorAll('.code-editor-btn');
+        const lineCountSpan = editorOverlay.querySelector('.line-count');
+        const charCountSpan = editorOverlay.querySelector('.char-count');
+        
+        // Armazenar código original e modificável
+        let originalCode = '';
+        let currentCode = '';
+        let currentFile = 'main';
+        
+        // Arquivos do editor
+        const editorFileContents = {
+            'main': '',
+            'styles': menuStyles,
+            'settings': JSON.stringify(settings, null, 2)
+        };
+        
+        // Toggle do menu
+        menuButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menuPanel.classList.toggle('active');
+        });
+        
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!menuContainer.contains(e.target)) {
+                menuPanel.classList.remove('active');
+            }
+        });
+        
+        // Controles de toggle
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const setting = this.dataset.setting;
+                settings[setting] = !settings[setting];
+                this.classList.toggle('active', settings[setting]);
+                applySettings();
+            });
+        });
+        
+        // Controles de select
+        selects.forEach(select => {
+            select.addEventListener('change', function() {
+                const setting = this.dataset.setting;
+                settings[setting] = this.value;
+                applySettings();
+            });
+        });
+        
+        // Controles de range
+        ranges.forEach(range => {
+            range.addEventListener('input', function() {
+                const setting = this.dataset.setting;
+                settings[setting] = parseFloat(this.value);
+                applySettings();
+            });
+        });
+        
+        // Botões de ação
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                const action = this.dataset.action;
+                
+                if (action === 'reset') {
+                    resetSettings();
+                } else if (action === 'save') {
+                    saveSettings();
+                } else if (action === 'openEditor') {
+                    openCodeEditor();
+                } else if (action === 'export') {
+                    exportSettings();
+                }
+            });
+        });
+        
+        // Editor de código - Troca de arquivos
+        editorFiles.forEach(file => {
+            file.addEventListener('click', function() {
+                editorFiles.forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+                
+                currentFile = this.dataset.file;
+                loadFileContent();
+            });
+        });
+        
+        // Editor de código - Botões
+        editorButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.classList.contains('save')) {
+                    saveCode();
+                } else if (this.classList.contains('reset')) {
+                    resetCode();
+                } else if (this.classList.contains('cancel')) {
+                    closeCodeEditor();
+                }
+            });
+        });
+        
+        // Editor de código - Atualização de contadores
+        codeEditorTextarea.addEventListener('input', function() {
+            updateCodeStats();
+            editorFileContents[currentFile] = this.value;
+        });
+        
+        // Fechar editor com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && editorOverlay.style.display === 'flex') {
+                closeCodeEditor();
+            }
+        });
+        
+        // Função para capturar o código JavaScript atual
+        function getCurrentJavaScript() {
+            // Captura todo o script atual (esta função e suas dependências)
+            const scripts = document.querySelectorAll('script');
+            let jsCode = '';
+            
+            scripts.forEach(script => {
+                if (script.textContent.includes('floatingConfigMenu')) {
+                    jsCode = script.textContent;
+                }
+            });
+            
+            if (!jsCode) {
+                // Se não encontrar, retorna um template básico
+                jsCode = `// Menu de Configurações Editável
+(function() {
+    'use strict';
+    
+    // Seu código personalizado aqui
+    console.log('Menu de configurações carregado!');
+    
+    // Exemplo de função personalizada
+    function minhaFuncaoPersonalizada() {
+        alert('Função personalizada executada!');
+    }
+    
+    // Adicionar ao menu
+    window.configMenuCustom = {
+        myFunction: minhaFuncaoPersonalizada
+    };
+})();`;
+            }
+            
+            return jsCode;
+        }
+        
+        // Abrir editor de código
+        function openCodeEditor() {
+            try {
+                originalCode = getCurrentJavaScript();
+                editorFileContents['main'] = originalCode;
+                editorFileContents['settings'] = JSON.stringify(settings, null, 2);
+                
+                loadFileContent();
+                editorOverlay.style.display = 'flex';
+                menuPanel.classList.remove('active');
+            } catch (error) {
+                console.error('Erro ao abrir editor:', error);
+                alert('❌ Erro ao abrir o editor: ' + error.message);
+            }
+        }
+        
+        // Carregar conteúdo do arquivo
+        function loadFileContent() {
+            try {
+                codeEditorTextarea.value = editorFileContents[currentFile] || '';
+                updateCodeStats();
+            } catch (error) {
+                console.error('Erro ao carregar arquivo:', error);
+                codeEditorTextarea.value = '// Erro ao carregar o arquivo';
+            }
+        }
+        
+        // Atualizar estatísticas
+        function updateCodeStats() {
+            const content = codeEditorTextarea.value;
+            const lines = content.split('\n').length;
+            const chars = content.length;
+            
+            lineCountSpan.textContent = lines;
+            charCountSpan.textContent = chars;
+        }
+        
+        // Salvar e aplicar código
+        function saveCode() {
+            try {
+                const newCode = codeEditorTextarea.value;
+                
+                if (currentFile === 'main') {
+                    // Validar JavaScript
+                    new Function(newCode);
+                    
+                    // Aplicar novo código
+                    const scriptElement = document.createElement('script');
+                    scriptElement.textContent = newCode;
+                    
+                    // Remover menu atual
+                    const existingMenu = document.getElementById('floatingConfigMenu');
+                    if (existingMenu) {
+                        existingMenu.remove();
+                    }
+                    
+                    // Aplicar novo script
+                    document.head.appendChild(scriptElement);
+                    
+                    alert('✅ Código aplicado com sucesso!');
+                    closeCodeEditor();
+                    
+                } else if (currentFile === 'styles') {
+                    // Atualizar estilos
+                    const existingStyle = document.querySelector('style');
+                    if (existingStyle && existingStyle.textContent.includes('floatingConfigMenu')) {
+                        existingStyle.textContent = newCode;
+                    }
+                    alert('🎨 Estilos atualizados!');
+                    
+                } else if (currentFile === 'settings') {
+                    // Atualizar configurações
+                    const newSettings = JSON.parse(newCode);
+                    Object.assign(settings, newSettings);
+                    updateUI();
+                    applySettings();
+                    alert('⚙️ Configurações atualizadas!');
+                }
+                
+            } catch (error) {
+                alert('❌ Erro no código: ' + error.message);
+                console.error('Erro ao aplicar código:', error);
+            }
+        }
+        
+        // Resetar código
+        function resetCode() {
+            if (confirm('Tem certeza que deseja resetar o código?')) {
+                if (currentFile === 'main') {
+                    codeEditorTextarea.value = originalCode;
+                } else if (currentFile === 'styles') {
+                    codeEditorTextarea.value = menuStyles;
+                } else if (currentFile === 'settings') {
+                    codeEditorTextarea.value = JSON.stringify(settings, null, 2);
+                }
+                updateCodeStats();
+            }
+        }
+        
+        // Fechar editor
+        function closeCodeEditor() {
+            editorOverlay.style.display = 'none';
+        }
+        
+        // Exportar configurações
+        function exportSettings() {
+            const exportData = {
+                settings: settings,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'config-menu-settings.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('📁 Configurações exportadas!');
+        }
+        
+        // Aplicar configurações
+        function applySettings() {
+            // Modo escuro
+            if (settings.darkMode) {
+                document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+            } else {
+                document.body.style.filter = '';
+            }
+            
+            // Opacidade
+            document.body.style.opacity = settings.opacity;
+            
+            // Tema (exemplo com mudança de cor de fundo)
+            const themeColors = {
+                default: '',
+                blue: '#e3f2fd',
+                green: '#e8f5e8',
+                purple: '#f3e5f5'
+            };
+            
+            if (themeColors[settings.theme]) {
+                document.body.style.backgroundColor = themeColors[settings.theme];
+            }
+            
+            // Animações
+            if (!settings.animations) {
+                document.body.style.transition = 'none';
+                document.body.style.animation = 'none';
+            } else {
+                document.body.style.transition = '';
+                document.body.style.animation = '';
+            }
+            
+            console.log('Configurações aplicadas:', settings);
+        }
+        
+        // Resetar configurações
+        function resetSettings() {
+            settings = {
+                darkMode: false,
+                theme: 'default',
+                opacity: 1,
+                notifications: true,
+                autosave: true,
+                sound: false,
+                animations: true,
+                cache: true
+            };
+            
+            updateUI();
+            applySettings();
+            alert('Configurações resetadas!');
+        }
+        
+        // Salvar configurações
+        function saveSettings() {
+            console.log('Configurações salvas:', settings);
+            alert('Configurações salvas com sucesso!');
+            menuPanel.classList.remove('active');
+        }
+        
+        // Atualizar interface
+        function updateUI() {
+            toggles.forEach(toggle => {
+                const setting = toggle.dataset.setting;
+                toggle.classList.toggle('active', settings[setting]);
+            });
+            
+            selects.forEach(select => {
+                const setting = select.dataset.setting;
+                select.value = settings[setting];
+            });
+            
+            ranges.forEach(range => {
+                const setting = range.dataset.setting;
+                range.value = settings[setting];
+            });
+        }
+        
+        // Inicializar
+        updateUI();
+        applySettings();
+        
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UserApp - Lista de Contatos</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlVzZXJBcHAgLSBMaXN0YSBkZSBDb250YXRvcyIsCiAgInNob3J0X25hbWUiOiAiVXNlckFwcCIsCiAgImRlc2NyaXB0aW9uIjogIkFwbGljYXRpdm8gcGFyYSBnZXJlbmNpYXIgc2V1cyBjb250YXRvcyBkZSBmb3JtYSBpbnRlbGlnZW50ZSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjNjY3ZWVhIiwKICAidGhlbWVfY29sb3IiOiAiIzY2N2VlYSIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAiY2F0ZWdvcmllcyI6IFsicHJvZHVjdGl2aXR5IiwgInV0aWxpdGllcyIsICJzb2NpYWwiXSwKICAibGFuZyI6ICJwdC1CUiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU5USTNJaUJvWldsbmFIUTlJalV5TjJJaUlIWnBaWGRDYjNnOUlqQWdNQ0ExTWpjZ05USTNJaUJtYVd4c1BTSnViMjVsSWlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpUGp4a1pXWnpQanh6ZEc5d0xXTnZiRzl5SUc5bVpuTmxkRDBpTXlVaUlITjBiM0F0WTI5c2IzSTlJaU5tWm1ZaUx6NHpZek0xUDNOMGIzQXRZMjlzYjNJOUlpTTJOamRsWldFaUx6NGxRbE1rUVVBa1FsUWxRbFFsUWxRbFFsUWxRbFFsUWlCemRHOXdMV052Ykc5eVBTSWpOelkwWW1GeklpOCtQQzlrWldaelBqeHlaV04wSUhkcFpIUm9QU0kxTWpjaUlHaGxhV2RvZEQwaU5USTNJaUJtYVd4c1BTSjFjbXdvSTJkeVlXUXBJajQ4TDNKbFkzUStQSE5oY0drZ2QybGtkR2c5SWpVeU55SWdhR1ZwWjJoMFBTSTFNamNpSUdacGJHdzlJaTV1YjI1bElpQnpkSEp2YTJVOWFXNW9aWEpwZENBM016cHdjSGdqUmdGNWMyNWlJamdvYzNSeWIydGxMWGRwWkhSb09qQTdKUzkxY21vb1BHUTVWMFZ6ZEdkK01qUTBLRVozV0dWTFNIaFdOMU5pZFdkMU5GUm1aMVJUWlRVMGFHZDFRMFpHTTBaUFlrNTJOSEJpZEV0WGJsZEVhRWhaU0VWTGJYZDNKUzFjWmlCa2FXWm1jVTFIV2pOa01YWmFhWEZTU1VoYVpDZHpVbGh5VGtST2IyMVZlRmxsYWpkcmRXZE1jbU50WVZwcGRHdHdTMWw0ZFhaRmMxYzVaV3RsV2xGV0xYWlFRM0pqVldSTWVsWnFSMGQ0VEhSb2VVTmFWR28zTFdzME4weDNURzg1VkU1RVpWZDRkVXB2WVU5elMxTlVOR2MxVEVwME9HZ3liVnBzUjNJeFdWZEpOMVYwVVdoRVpVTktWVzV2ZGtkbE1HTXhWbWwyYTNsS2EydG5jVTE1ZUVsNWFYQlZla1Z5TmpkWFJUUlhOM2czV0c1dlkyNUVOV3REV2s1WVZtaDBjWGQxTTNJME5tWm5TV1kwV1ZVdGJUUlpOMnBpTnpWclMyaDRhazQ0VlZwamQzSXlSWHBzVkV4SWNDTjVUbms0V1RSTVZXUm1aVk5mT1ZNeFJXVTJWRTFQYUZkSVRrcDBZMUJyWjNOVlYzaG5jRkpMUkY5TVlWZzRhV0ZYYVdsclgyRjBkVTl5ZFdWTWVqUXJXVTE1YmpWdVdEZEtZVFpyZVVVeU1GUnNSVlZJVDBrNVJVWlhXSGxGZW5aUmQzSjNjRVIzVFdWbVp6QlBPRmNyVTBselJUSndhbkZEVGxKYVJsODRNME5oWVhCM09IZDBPVkoxWWpkaE56QkZSWEZGVVRrNVVsSnVPVE53ZUVoS2JFUm5NMlpQY0VZck1UQXphRkUwZEc1R1dXZGxkMFpSVXpadlQybDNjRWRrVUVWbVZGOTFVbHB6UVhSWWVuQnVNR0ZJT1ZCNllVNXhZM0JZVEdWRlNrRlJXSFV5VFdkVmNWOUxSbkJ5TFRFek5rWjZWMVEzZUhOblRteFhjVGx3V2pKbGJVOTZjV0p4UTFrNWRXeHNRMlZUU21KaWRXRmhkMFl5WmsxUGJsZGxWSGxDVVVkUE9IcGFWV3BCU2xoUldXRnBNQzF6V0VKdVFYSkpZazB3VTBJNFJHbEJSalJIV1ZZdFExQnlUVUpGTkZscWJDOHJNWEZXV25acGJEVnVkMjFzWkVOR1FWQlhVa2g0Tm1SQlpWZFJiSGhZVGtOUWExTjNVVVV1VTBBK0lEeDBaWGgwSUhOOGVsMENHaTUwZERFNGN6ZG5QVWQzT2tNREF3TUROakF6TkJKZ0JIOGx0SGNzSnpsVG1zbjNNMWtBQUFBQUVsRlRrU3VRbUNDSWk4K1BDOXpkbWMrSWc9PSIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogIm1hc2thYmxlIGFueSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpVMklpQm9aV2xuYUhROUlqSTFOaUlnZG1sbGQwSnZlRDBpTUNBd0lESTFOaUF5TlRZaUlHWnBiR3c5SWlObWJuVnVaU0lnZUcxc2JuTTlJbWgwZEhBNkx5OTNkM2N1ZHpNdWIzSm5Mekl3TURBdmMzWm5JajVrUEd0NWFXb2dhV0dzdFFzaGN6SW9WRmRDWVc5V1RqOWNiU2I1N1BMUzdueTBnNFlLSUMrK0FWVWFnNHdrVmlHeWpoN2tZN1c5TGRRdUNnZ3NWRkRvcmdJQUFBQWJQSmNNWlNRS0FDQUFBQUFCSFRGMW5QSUFRQWU2WmdMVER3WVdBNnhiMGVBZkFkMk5UQnNiQllBQnNEVVFBRUFIZzdOZ0EzTWxvQUFBOVZNcU1UWHI0REFYMndTaThORkFTVGFBSElCa1hvVGdFWWNGME5BQUFBRWxGVGtTdVFtQ0NJaThQSElOZ1RBZUFjREFBQm1UMGZBUUJZc1VBQUFBQUFMUHJsM0xGcFluRXFOaENBbGpOZ1AwTXgwVEVZNHJKMGdGY1EzUVN4ZUFBQmFnVUJzYUhsOGljQVVYZEMyMXVnRFRTdGhnQUFBc28yTDE3MERPTVVGTGFTc1FBQUFBRWxGVGtTdVFtQ0NJaTgrSUE9PSIsCiAgICAgICJzaXplcyI6ICIyNTZ4MjU2IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTVRJNElpQm9aV2xuYUhROUlqRXlPQ0lnZG1sbGQwSnZlRDBpTUNBd0lERXlPQ0F4TWpnaUlHWnBiR3c5SWlObWJuVnVaU0lnZUcxc2JuTTlJbWgwZEhBNkx5OTNkM2N1ZHpNdWIzSm5Mekl3TURBdmMzWm5JajUwWXpaWVNHWklhRzF2Y0E9PSIsCiAgICAgICJzaXplcyI6ICIxMjh4MTI4IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTkRnaUlHaGxhV2RvZEQwaU5EZ2lJSFpwWlhkQ2IzZzlJakFnTUNBME9DQTBPQ0lnWm1sc2JEMGlibTl1WlNJZ2VHMXNibk05SW1oMGRIQTZMeTkzZDNjdVp6TXViM0puTHpJd01EQXZjM1puSWo0OFNWTlFRVkFvWlVGSlQwNVNOaklxSkJsNFNFNVNSaGRSTWtaOFUwb25OeXR5UWs5NUtWbzVpbGRWS2pFdWJIZGxkTWxrUjFKa2JXWnpNVmxUU0dSNlFXeDFkME0xVGsxM2NFOXpiRlJWTVdoTFUyMXRWbFYxWm1KRldYVkdXbVZwUWxwbFNIVnRZMnRJU2tWNVlqZHJXWFl4UmpkV09VbElXVmh0YUdaaFlWa3hZM0ExWjBwdWNIVmxOVUpBUVdnNVFuaFZNMHBxTWxOWFNHeGFNRzlvSzBaR1pWbFFRbFU0Y1VWRFlUbFRRMWRUYUVGclZYcEhXRWR6WVZjemJGWnVNazlhYnpSaVpqRjZTRzFzVDFKcmNsVlpjVTk1UTJaUE5UWndjMDF5VFZnMFowRktSWE4zVW1SV2NtOVZiVFpxUmpOMGJXTlFZMlJEWkZCWlEydFRXM1J6VGswdlNtZFRiR1psYWt4VVEzSlNSV2xXUVc1cllqa3pNazUyUkdwa1JEVnJUVWd5UVN4RlUyNXdVSGhXUTNSTmRYcE5lR3RvVFZsVVlVeFpRazVKVHpGMVlqZGxkMjV4VVVReGEwUlpNVGRWWW1VcEZqczVUbWRhYkNzNVJXRTFjbkphT0VselExTlRNVXhIVm05WVJXZ3Zkek5pVm14M1ZrcHZjVWw1VVZoVGNHNURNV3d6WVdaQlJYZEJjVGhKVXpadlRHdEdXWEJOYkVWV2RXMVpiWEJKTlVzNVkwWkZZV05PVkZkbk9ERnNhVVJ0U1V4cldWbDJUbVJNVGxGWlpqWlFibDkyV21wRE1tZE9VWGxQTW10UVRWVkJhVTlvUWsxSVowNW1NbEpLU3pKSVVWTnBSWE5MY0M1TFNqWTJhRVpCT0c5Rk1IWnJNazF2YkVKWGFtZHVaVzFLYkVKcFFVeHZaVlZvYm05clkyZHZNSG90U1dwdFVGWjZhbFpPSzNCNE9Fa3ZNVXc1TVRkdmNsaGlVR1JwYnprMEp3UkVKMHBWUWpZTUdqZ3FZVlF4VVVBOElBPT0iLAogICAgICAic2l6ZXMiOiAiNDh4NDgiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IgogICAgfQogIF0sCiAgInNjcmVlbnNob3RzIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBUHdBQUFEOENBWUFBQUNtd2ZnL0FBQUFBWEVTUjBJQmFRQlhad1FBQUQ4aEpGRFVRelFUeFlwRTMzWVFOZUlpeElFQUFEL2ZPaG5OdzNZRSIsICAgICAgInNpemVzIjogIjEwMDB4ODAwIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgImZvcm1fZmFjdG9yIjogIndpZGUiLAogICAgICAibGFiZWwiOiAiSG9tZSBTY3JlZW4iCiAgICB9CiAgXSwKICAicmVsYXRlZF9hcHBsaWNhdGlvbnMiOiBbXSwKICAicHJlZmVyX3JlbGF0ZWRfYXBwbGljYXRpb25zIjogZmFsc2UsCiAgInNob3J0Y3V0cyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAiTm92byBDb250YXRvIiwKICAgICAgInNob3J0X25hbWUiOiAiTm92byIsCiAgICAgICJkZXNjcmlwdGlvbiI6ICJBZGR0aW9uYXIgdW0gbm92byBjb250YXRvIiwKICAgICAgInVybCI6ICIvP2FjdGlvbj1uZXciLAogICAgICAiaWNvbnMiOiBbCiAgICAgICAgewogICAgICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LEVBQUFBUUVBQVFFQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBNGFBSkFBQUpBZ0FBSkF3QUFFQSIsICAgICAgICAgICJzaXplcyI6ICI5Nng5NiIsCiAgICAgICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAiUGVzcXVpc2FyIiwKICAgICAgInNob3J0X25hbWUiOiAiUGVzcXVpc2EiLAogICAgICAiZGVzY3JpcHRpb24iOiAiUGVzcXVpc2FyIGNvbnRhdG9zIiwKICAgICAgInVybCI6ICIvP2FjdGlvbj1zZWFyY2giLAogICAgICAiaWNvbnMiOiBbCiAgICAgICAgewogICAgICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LEVBQUFBUUVBQVFFQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBNGFBSkFBQUpBZ0FBSkF3QUFFQSIsICAgICAgICAgICJzaXplcyI6ICI5Nng5NiIsCiAgICAgICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgICAgIH0KICAgICAgXQogICAgfQogIF0sCiAgImVkZ2Vfc2lkZV9wYW5lbCI6IHsKICAgICJwcmVmZXJyZWRfZGlzcGxheV9tb2RlIjogIm1pbmltYWwiCiAgfSwKICAiaGFuZGxlX2xpbmtzIjogInByZWZlcnJlZCIsCiAgImxhdW5jaF9oYW5kbGVyIjogewogICAgImNsaWVudF9tb2RlIjogWyJuYXZpZ2F0ZS1leGlzdGluZyIsICJhdXRvIl0KICB9Cn0=">
+    
+    <!-- Meta tags for PWA -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UserApp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIGZpbGw9InVybCgjZ3JhZCkiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM2NjdlZWEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM3NjRiYTIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PSI5MCIgY3k9IjkwIiByPSI0NSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjIpIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC42KSIgc3Ryb2tlLXdpZHRoPSIzIi8+PHRleHQgeD0iOTAiIHk9IjEwNSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VUE8L3RleHQ+PC9zdmc+">
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('data:application/javascript;base64,Y29uc3QgQ0FDSEVfTkFNRSA9ICd1c2VyYXBwLXYxJzsKY29uc3QgdXJsc1RvQ2FjaGUgPSBbCiAgJy8nLAogICcvaW5kZXguaHRtbCcKXTsKCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignaW5zdGFsbCcsIGV2ZW50ID0+IHsKICBldmVudC53YWl0VW50aWwoKgogICAgY2FjaGVzLm9wZW4oQ0FDSEVfTkFNRSkKICAgICAgLnRoZW4oY2FjaGUgPT4gewogICAgICAgIHJldHVybiBjYWNoZS5hZGRBbGwodXJsc1RvQ2FjaGUpOwogICAgICB9KQogICApOwp9KTsKCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCBldmVudCA9PiB7CiAgZXZlbnQucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZXZlbnQucmVxdWVzdCkKICAgICAgLnRoZW4ocmVzcG9uc2UgPT4gewogICAgICAgIGlmIChyZXNwb25zZSkgewogICAgICAgICAgcmV0dXJuIHJlc3BvbnNlOwogICAgICAgIH0KICAgICAgICByZXR1cm4gZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgICAgIH0pCiAgKTsKfSk7')
+            .then(() => console.log('Service Worker registrado com sucesso'))
+            .catch(error => console.log('Erro ao registrar Service Worker:', error));
+        });
+      }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .burger-menu {
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease;
+        }
+
+        .burger-menu:hover {
+            transform: scale(1.1);
+        }
+
+        .burger-line {
+            width: 100%;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .burger-menu.active .burger-line:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .burger-menu.active .burger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger-menu.active .burger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(8px, -8px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-right: auto;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0 4px 25px rgba(255, 107, 107, 0.4); }
+            100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        }
+
+        .user-name {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-bar:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+
+        /* Sidebar Menu */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            transition: left 0.3s ease;
+            z-index: 2000;
+            padding: 80px 0 20px;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1500;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-item {
+            padding: 15px 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #4ecdc4;
+            transform: translateX(10px);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .content-title {
+            color: white;
+            font-size: 28px;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .content-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+        }
+
+        /* Names List */
+        .names-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .name-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .name-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .name-card:hover::before {
+            left: 100%;
+        }
+
+        .name-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .name-card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .name-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .name-info h3 {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .name-info p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .name-details {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+                gap: 10px;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .search-container {
+                max-width: none;
+            }
+
+            .names-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .name-card {
+                padding: 15px;
+            }
+
+            .content-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-results {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
+        <!-- Sidebar Menu -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-item">🏠 Início</div>
+            <div class="sidebar-item">👥 Contatos</div>
+            <div class="sidebar-item">⭐ Favoritos</div>
+            <div class="sidebar-item">📊 Estatísticas</div>
+            <div class="sidebar-item">⚙️ Configurações</div>
+            <div class="sidebar-item">📱 Sobre o App</div>
+            <div class="sidebar-item">🚪 Sair</div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="burger-menu" id="burgerMenu">
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+                <div class="user-name">João Silva</div>
+            </div>
+            
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Buscar contatos..." id="searchInput">
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Lista de Contatos</h1>
+                <p class="content-subtitle">Gerencie seus contatos de forma inteligente</p>
+            </div>
+            
+            <div class="names-grid" id="namesGrid">
+                <!-- Names will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample names data
+        const names = [
+            'Ana Silva Santos', 'Bruno Costa Lima', 'Carla Pereira Souza', 'Daniel Oliveira Rocha',
+            'Elena Ferreira Alves', 'Felipe Rodrigues Nunes', 'Gabriela Santos Costa', 'Henrique Lima Barbosa',
+            'Isabella Almeida Cruz', 'João Pedro Martins', 'Kamila Souza Fernandes', 'Leonardo Castro Dias',
+            'Mariana Ribeiro Gomes', 'Nicolas Andrade Silva', 'Otávio Cardoso Pinto', 'Patricia Mendes Teixeira',
+            'Quincy Moreira Santos', 'Rafaela Campos Azevedo', 'Samuel Torres Nascimento', 'Tatiana Ramos Freitas',
+            'Ulisses Correia Lopes', 'Viviane Borges Machado', 'Wagner Vieira Caldas', 'Ximena Duarte Moura',
+            'Yuri Fonseca Carvalho', 'Zara Monteiro Reis', 'André Batista Coelho', 'Beatriz Cunha Vasconcelos',
+            'César Prado Medeiros', 'Débora Leal Guimarães', 'Eduardo Siqueira Melo', 'Fernanda Xavier Peixoto',
+            'Gustavo Tavares Nogueira', 'Helena Araújo Miranda', 'Igor Damasceno Porto', 'Juliana Moura Barros',
+            'Kleber Rezende Farias', 'Larissa Braga Cavalcanti', 'Mateus Gonçalves Paiva', 'Natália Mota Silveira',
+            'Oscar Barbosa Rangel', 'Priscila Leite Godoy', 'Renato Cardeal Brito', 'Sabrina Figueiredo Luna',
+            'Thiago Valente Pacheco', 'Úrsula Magalhães Pedrosa', 'Vinícius Sampaio Rego', 'Yasmin Lobato Morais',
+            'Alberto Rocha Bezerra', 'Camila Esteves Monteiro', 'Diego Neves Carvalho', 'Eduarda Pires Teles',
+            'Fábio Macedo Galvão', 'Giovanna Torres Freire', 'Hugo Miranda Lemos', 'Ísis Caldeira Viana',
+            'Júlio Cesar Barreto', 'Karina Veloso Ávila', 'Lucas Henrique Dias', 'Marina Costa Evangelista',
+            'Nathan Sousa Prado', 'Olívia Bernardes Campos', 'Paulo Roberto Silva', 'Rebeca Farias Castro',
+            'Sérgio Antunes Ribeiro', 'Talita Moreira Pessoa', 'Ubirajara Santos Cruz', 'Valéria Mendonça Lima',
+            'William Cunha Batista', 'Xerxes Oliveira Rocha', 'Yara Silveira Menezes', 'Zeca Ramos Monteiro',
+            'Adriana Lopes Carneiro', 'Bernardo Teixeira Gomes', 'Cláudia Fernandes Aguiar', 'Douglas Pereira Lima',
+            'Eliane Soares Cardoso', 'Flávio Araújo Santos', 'Graziela Albuquerque Reis', 'Heitor Cavalcanti Neto',
+            'Ingrid Barbosa Correia', 'José Carlos Medeiros', 'Kelly Cristina Alves', 'Luis Fernando Costa',
+            'Mônica Ribeiro Leal', 'Norberto Silva Campos', 'Olga Pereira Machado', 'Pedro Henrique Dias',
+            'Rosa Maria Santos', 'Silvana Costa Azevedo', 'Túlio Magalhães Reis', 'Urânia Freitas Moura',
+            'Valdir Nascimento Cruz', 'Wanda Oliveira Porto', 'Xisto Barros Figueiredo', 'Yolanda Pinto Caldas',
+            'Zuleika Fernandes Gomes', 'Armando Souza Vieira', 'Bianca Rocha Miranda', 'Cássio Almeida Torres',
+            'Denise Martins Evangelista', 'Emerson Castro Lopes', 'Fátima Gonçalves Prado', 'Geraldo Santos Moreira',
+            'Heloísa Cardoso Viana', 'Ivo Pereira Bezerra', 'Jaqueline Lima Cavalcanti', 'Kleiton Araújo Brito',
+            'Lúcia Helena Costa', 'Marcelo Teixeira Nunes', 'Nilza Ferreira Santos', 'Osvaldo Rodrigues Lima',
+            'Patrícia dos Santos', 'Quirino Alves Machado', 'Rosângela Pereira Cruz', 'Sebastião Lima Rocha',
+            'Tereza Cristina Souza', 'Ubaldo Ferreira Gomes', 'Vera Lúcia Barbosa', 'Wellington Costa Silva'
+        ];
+
+        // Generate additional professional info
+        const professions = [
+            'Desenvolvedor', 'Designer', 'Gerente', 'Analista', 'Consultor', 'Advogado', 'Médico', 'Professor',
+            'Engenheiro', 'Arquiteto', 'Contador', 'Vendedor', 'Marketing', 'RH', 'Financeiro', 'TI'
+        ];
+
+        const companies = [
+            'Tech Solutions', 'Inovação Ltda', 'Global Corp', 'StartUp Inc', 'Empresa S.A.',
+            'Consultoria ABC', 'Sistemas XYZ', 'Digital Agency', 'Business Group', 'Innovation Hub'
+        ];
+
+        let allContacts = [];
+        let filteredContacts = [];
+
+        // Initialize contacts
+        function initializeContacts() {
+            allContacts = names.map((name, index) => ({
+                id: index,
+                name: name,
+                initials: name.split(' ').map(n => n[0]).join('').substring(0, 2),
+                profession: professions[Math.floor(Math.random() * professions.length)],
+                company: companies[Math.floor(Math.random() * companies.length)],
+                email: name.toLowerCase().replace(/\s+/g, '.') + '@email.com'
+            }));
+            filteredContacts = [...allContacts];
+            renderContacts();
+        }
+
+        // Render contacts
+        function renderContacts() {
+            const grid = document.getElementById('namesGrid');
+            
+            if (filteredContacts.length === 0) {
+                grid.innerHTML = '<div class="no-results">Nenhum contato encontrado</div>';
+                return;
+            }
+
+            grid.innerHTML = filteredContacts.map(contact => `
+                <div class="name-card" onclick="selectContact('${contact.name}')">
+                    <div class="name-card-header">
+                        <div class="name-avatar">${contact.initials}</div>
+                        <div class="name-info">
+                            <h3>${contact.name}</h3>
+                            <p>${contact.profession}</p>
+                        </div>
+                    </div>
+                    <div class="name-details">
+                        <div>📧 ${contact.email}</div>
+                        <div>🏢 ${contact.company}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Search functionality
+        function filterContacts(searchTerm) {
+            filteredContacts = allContacts.filter(contact =>
+                contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                contact.profession.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                contact.company.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            renderContacts();
+        }
+
+        // Contact selection
+        function selectContact(name) {
+            console.log('Contato selecionado:', name);
+            // Add animation
+            event.target.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                event.target.style.transform = '';
+            }, 150);
+        }
+
+        // Menu functionality
+        const burgerMenu = document.getElementById('burgerMenu');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const searchInput = document.getElementById('searchInput');
+
+        burgerMenu.addEventListener('click', () => {
+            burgerMenu.classList.toggle('active');
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            burgerMenu.classList.remove('active');
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Sidebar item clicks
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', () => {
+                console.log('Menu item clicked:', item.textContent);
+                // Close sidebar
+                burgerMenu.classList.remove('active');
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            filterContacts(e.target.value);
+        });
+
+        // Initialize app
+        initializeContacts();
+
+        // Add some entrance animations
+        setTimeout(() => {
+            document.querySelectorAll('.name-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        }, 100);
+    </script>
+</body>
+</html>

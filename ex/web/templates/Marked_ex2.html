@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Marked.js com Classes Customizadas</title>
+	<!-- Importando marked.js via CDN -->
+	<!-- funciona somente com a versão 9.1.6-->
+	<script src="/js/marked-v9.1.6.min.js"></script>
+</head>
+<body>
+	<div id="output"></div>
+
+	<script>
+		// Configurando o renderer personalizado
+		const renderer = new marked.Renderer();
+
+		// Personalizando o renderer para elementos code
+		renderer.code = function(code, language) {
+		return `<pre class="my-pre-class">
+		<code class="my-code-class language-${language}">${code}</code>
+		</pre>`;
+		};
+
+		// Personalizando o renderer para elementos code inline
+		renderer.codespan = function(code) {
+		return `<code class="my-inline-code-class">${code}</code>`;
+		};
+
+		// Configurando o marked para usar o renderer personalizado
+		marked.setOptions({
+		renderer: renderer
+		});
+
+		// Exemplo de markdown
+		const markdown = `
+		# Exemplo de código
+
+		\`\`\`javascript
+		function exemplo() {
+		console.log("Olá mundo!");
+		}
+		\`\`\`
+
+		E aqui temos um \`código inline\` como exemplo.
+		`;
+
+		// Convertendo e exibindo o resultado
+		document.getElementById('output').innerHTML = marked.parse(markdown);
+	</script>
+
+	<style>
+		/* Estilos básicos para demonstração */
+		.my-pre-class {
+		background-color: #f4f4f4;
+		padding: 1em;
+		border-radius: 4px;
+		}
+
+		.my-code-class {
+		font-family: monospace;
+		color: #333;
+		}
+
+		.my-inline-code-class {
+		background-color: #eee;
+		padding: 2px 4px;
+		border-radius: 3px;
+		font-family: monospace;
+		}
+	</style>
+</body>
+</html>
