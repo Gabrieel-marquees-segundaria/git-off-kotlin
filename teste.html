@@ -54,7 +54,7 @@
             background-color: #7f8c8d;
         }
     </style>
-
+<link rel="stylesheet" href="./src/styles/base16/atelier-heath.css">
 
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -68,14 +68,21 @@
 
 
 
-<script>
-  const markdown = "# Olá\n\nEsse é um **parágrafo**.";
-//   const html = marked.parse(markdown);
-//   document.getElementById("resultado").innerHTML = html;
+<script type="module">
+import {topBar} from "./public/js/tests-interface.js"
+import {dictKeysToSelect} from "./public/js/select-test"
+import {fileContents} from "./public/js/file-exmplos"
+import {mostrarConteudo} from "./src/js/mostrarConteudo"
+
+const resultado = document.getElementById("resultado")
+
+const select = dictKeysToSelect(fileContents, "teste", (event)=>{
+   const value = event.target.value;
+mostrarConteudo(fileContents[value], value)
+})
 
 
-
-
+topBar.add(select)
 </script>
 </body>
 </html>

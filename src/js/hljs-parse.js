@@ -1,4 +1,4 @@
-syntax_highlight_map = {
+ export const syntax_highlight_map = {
     ".py": "python",
     ".js": "javascript",
     ".cjs": "javascript",
@@ -39,7 +39,7 @@ syntax_highlight_map = {
     ".swift": "swift"
 };
 
-class Hljs {
+ export class Hljs {
     constructor() {
         this.langs = syntax_highlight_map;
     }
