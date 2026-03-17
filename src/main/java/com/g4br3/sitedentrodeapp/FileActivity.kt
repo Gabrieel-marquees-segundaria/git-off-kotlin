@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -78,12 +79,18 @@ class FileActivity : AppCompatActivity() {
         val titulo = intent.getStringExtra("titulo") ?: "Nome da Tela"
         var url = intent.getStringExtra("url") ?: "file:///android_asset/view.html"
         var file = intent.getStringExtra("file")
+        var fileName ="hello"
+        if (file is String) {
+            fileName = file.split("/")[file.split("/").size - 1]
+        }
+        Log.d("WebView", "file name: $file")
         var conteudo = File(file).readText(Charsets.UTF_8) ?: "not found"
         var conteudoScapado = conteudo
             .replace("\\", "\\\\")
             .replace("'", "\\'")
             .replace("\n", "\\n")
             .replace("\r", "")
+        Log.d("WebView", "file conteudo: $conteudoScapado")
         val tvTituloTela = findViewById<TextView>(R.id.tvTituloTela)
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
         tvTituloTela.text = titulo
@@ -156,12 +163,29 @@ class FileActivity : AppCompatActivity() {
 
         Log.d("WebView", "Carregando URL: $url")
         // webView.loadUrl(url)
+
+
         currentSite(
             url, {
-                webView.evaluateJavascript("mostrarConteudo('$conteudoScapado')", null)
+             //   webView.evaluateJavascript("mostrarConteudo('$conteudoScapado', 'hello')", null)
+
+                webView.webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView, url: String) {
+                        webView.evaluateJavascript("window.mostrarConteudo('$conteudoScapado', '$fileName')", null)
+                    }
+                }
             }
         )
+        class JsBridge {
+            @JavascriptInterface
+            fun onJsReady() {
+                runOnUiThread {
+                    webView.evaluateJavascript("window.mostrarConteudo('$conteudoScapado', '$titulo')", null)
+                }
+            }
+        }
 
+        webView.addJavascriptInterface(JsBridge(), "Android")
     }
 
     @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
