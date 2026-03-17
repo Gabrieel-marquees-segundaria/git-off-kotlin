@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 // removed unused import
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -49,6 +52,20 @@ class FilesListActivity : AppCompatActivity() {
 
         // Usar o layout da lista de arquivos
         setContentView(R.layout.activity_files_list)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            window.insetsController?.let { controller ->
+                // Esconde a barra de status e a barra de navegação
+                controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                // Faz com que as barras reapareçam apenas com um swipe (comportamento imersivo)
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        }
+
+
+
         val recyclerView = findViewById<RecyclerView>(R.id.rvArquivos)
         recyclerView.layoutManager = LinearLayoutManager(this)
         // Use a mutable list so we can add items dynamically

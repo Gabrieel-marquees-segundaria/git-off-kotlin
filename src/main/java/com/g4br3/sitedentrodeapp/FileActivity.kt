@@ -19,7 +19,10 @@ import android.webkit.WebViewClient
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import com.g4br3.sitedentrodeapp.components.FileName
 import java.io.File
 
@@ -75,6 +78,26 @@ class FileActivity : AppCompatActivity() {
                     WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         }
+
+                // This callback will only be called when the activity is at least in the STARTED state.
+                val callback = object : OnBackPressedCallback(true /* enabled by default */) {
+                    override fun handleOnBackPressed() {
+                        if (webView.canGoBack()) {
+                            webView.goBack()
+                        } else {
+                            //super.onBackPressed()
+
+                            val intent = Intent(this@FileActivity, FilesListActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
+                }
+
+                onBackPressedDispatcher.addCallback(this, callback)
+
+
+
         // Definir título da tela (pode vir via Intent)
         val titulo = intent.getStringExtra("titulo") ?: "Nome da Tela"
         var url = intent.getStringExtra("url") ?: "file:///android_asset/view.html"
