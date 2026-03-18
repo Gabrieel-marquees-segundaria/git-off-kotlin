@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,7 @@ import android.view.WindowInsetsController
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +27,8 @@ import com.g4br3.sitedentrodeapp.recicleView.FileType
 import com.g4br3.sitedentrodeapp.recicleView.FilesAdapter
 import com.g4br3.sitedentrodeapp.recicleView.Folder
 import com.g4br3.sitedentrodeapp.recicleView.getIcon
+import com.g4br3.sitedentrodeapp.utils.RequestApk
+import com.g4br3.sitedentrodeapp.utils.installAPK
 import kotlinx.coroutines.NonCancellable.children
 import org.bouncycastle.asn1.iana.IANAObjectIdentifiers.directory
 import org.eclipse.jgit.internal.storage.file.FileSnapshot.save
@@ -39,6 +43,8 @@ class FilesListActivity : AppCompatActivity() {
     lateinit var adapter: FilesAdapter
     lateinit var reposDir: File
     lateinit var sharedPref: SharedPreferences
+    private var downloadReceiver: android.content.BroadcastReceiver? = null
+    private var currentDownloadId: Long? = null
 
     @SuppressLint("WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +63,7 @@ class FilesListActivity : AppCompatActivity() {
 
         // Usar o layout da lista de arquivos
         setContentView(R.layout.activity_files_list)
-
+        getCurrentVersion()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let { controller ->
@@ -329,6 +335,75 @@ class FilesListActivity : AppCompatActivity() {
         }
 
 
+    }
+
+
+    fun getCurrentVersion(){
+        val requestApk = RequestApk()
+        var currentVersion = sharedPref.getString("Apk-version", "1.0")
+        currentVersion = currentVersion ?: "1.0"
+        RequestApk.getLatestReleaseApkUrl(currentVersion = currentVersion) { hasUpdate, latest, apkUrl, error ->
+            runOnUiThread {
+                sharedPref.edit().putString("Apk-version", latest)
+                if (error != null) {
+                    Toast.makeText(this, "Erro: $error", Toast.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+
+                if (!hasUpdate) {
+                    Toast.makeText(this, "App já está atualizado (última: $latest)", Toast.LENGTH_SHORT).show()
+                    return@runOnUiThread
+                }
+
+                if (apkUrl.isNullOrBlank()) {
+                    Toast.makeText(this, "Nova versão $latest, mas nenhum APK disponível.", Toast.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+
+                // Register receiver on application context and store it
+                downloadReceiver = RequestApk.downloadApkReceiver(this) { id: Long, localUri: Uri? ->
+                    runOnUiThread {
+                        Log.d("FilesList", "Download complete id=$id localUri=$localUri")
+                        if (id == currentDownloadId) {
+                            if (localUri != null) {
+                                installAPK(this, localUri)
+                            } else {
+                                Toast.makeText(this, "Download finalizado, mas arquivo não está disponível localmente.", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+                }
+
+                // Inicia download e guarda o id
+                currentDownloadId = RequestApk.downloadApk(this, apkUrl, "gitOffAppKotlin.apk")
+                Log.d("FilesList", "Started download with id=$currentDownloadId")
+            }
+        }
+
+        RequestApk.getVersion(currentVersion = "v1.0.0") { hasUpdate, latest, error ->
+            runOnUiThread {
+                when {
+                    error != null -> Toast.makeText(this, "Erro: ${error}", Toast.LENGTH_LONG).show()
+                    hasUpdate -> Toast.makeText(this, "Nova versão: $latest", Toast.LENGTH_LONG).show()
+                    else -> Toast.makeText(this, "Atualizado (última: $latest)", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Cleanup receiver if registered
+        try {
+            if (downloadReceiver != null) {
+                applicationContext.unregisterReceiver(downloadReceiver)
+                downloadReceiver = null
+            }
+        } catch (e: Exception) {
+            // ignore
+        }
     }
 }
 
