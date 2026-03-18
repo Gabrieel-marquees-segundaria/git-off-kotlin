@@ -27,6 +27,7 @@ import com.g4br3.sitedentrodeapp.recicleView.FileType
 import com.g4br3.sitedentrodeapp.recicleView.FilesAdapter
 import com.g4br3.sitedentrodeapp.recicleView.Folder
 import com.g4br3.sitedentrodeapp.recicleView.getIcon
+import com.g4br3.sitedentrodeapp.utils.ApkInstall
 import com.g4br3.sitedentrodeapp.utils.RequestApk
 import com.g4br3.sitedentrodeapp.utils.installAPK
 import kotlinx.coroutines.NonCancellable.children
@@ -340,11 +341,13 @@ class FilesListActivity : AppCompatActivity() {
 
     fun getCurrentVersion(){
         val requestApk = RequestApk()
-        var currentVersion = sharedPref.getString("Apk-version", "1.0")
-        currentVersion = currentVersion ?: "1.0"
+        val currentVersionName ="Apk-version-5"
+        var currentVersion = sharedPref.getString(currentVersionName, "1.0").toString()
+        Log.d("FilesList","currentVercion: "+currentVersion.toString())
+
         RequestApk.getLatestReleaseApkUrl(currentVersion = currentVersion) { hasUpdate, latest, apkUrl, error ->
             runOnUiThread {
-                sharedPref.edit().putString("Apk-version", latest)
+
                 if (error != null) {
                     Toast.makeText(this, "Erro: $error", Toast.LENGTH_LONG).show()
                     return@runOnUiThread
@@ -366,7 +369,7 @@ class FilesListActivity : AppCompatActivity() {
                         Log.d("FilesList", "Download complete id=$id localUri=$localUri")
                         if (id == currentDownloadId) {
                             if (localUri != null) {
-                                installAPK(this, localUri)
+                               ApkInstall().installAPK (this, localUri)
                             } else {
                                 Toast.makeText(this, "Download finalizado, mas arquivo não está disponível localmente.", Toast.LENGTH_LONG).show()
                             }
@@ -375,8 +378,11 @@ class FilesListActivity : AppCompatActivity() {
                 }
 
                 // Inicia download e guarda o id
-                currentDownloadId = RequestApk.downloadApk(this, apkUrl, "gitOffAppKotlin.apk")
-                Log.d("FilesList", "Started download with id=$currentDownloadId")
+                if (latest != currentVersion) {
+                    currentDownloadId = RequestApk.downloadApk(this, apkUrl, "gitOffAppKotlin.apk")
+                    Log.d("FilesList", "Started download with id=$currentDownloadId")
+                    sharedPref.edit().putString(currentVersionName, latest). apply()
+                }
             }
         }
 

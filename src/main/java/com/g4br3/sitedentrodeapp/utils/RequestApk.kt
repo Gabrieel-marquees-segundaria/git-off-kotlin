@@ -16,7 +16,7 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 import android.util.Log
-
+import java.io.File
 
 
 class RequestApk {
@@ -165,10 +165,16 @@ class RequestApk {
             .setDescription("O arquivo APK está sendo baixado...")
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             // Use app-specific external files dir to avoid scoped-storage issues
-            .setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, fileName)
+            //.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, fileName)
+            // ERRADO (Gera o erro java.lang.IllegalArgumentException)
+            // CORRETO (Caminho público: /storage/emulated/0/Download/)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
             .setAllowedOverMetered(true)
             .setAllowedOverRoaming(true)
-
+        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
+        if (file.exists()) {
+            file.delete()
+        }
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         return downloadManager.enqueue(request)
     }

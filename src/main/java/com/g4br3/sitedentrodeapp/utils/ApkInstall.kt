@@ -38,17 +38,18 @@ fun installAPK(context: Context, filePath: String) {
 
 
 class ApkInstall {
-}
 
-// Overload that accepts a Uri (for DownloadManager localUri)
-fun installAPK(context: Context, uri: Uri) {
-    val intent = Intent(Intent.ACTION_VIEW)
-    intent.setDataAndType(uri, "application/vnd.android.package-archive")
-    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    try {
-        context.startActivity(intent)
-    } catch (e: Exception) {
-        Log.e("ApkInstall", "Erro ao abrir instalador via Uri", e)
+
+    // Overload that accepts a Uri (for DownloadManager localUri)
+    fun installAPK(context: Context, uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(uri, "application/vnd.android.package-archive")
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("ApkInstall", "Erro ao abrir instalador via Uri", e)
+        }
     }
 }
