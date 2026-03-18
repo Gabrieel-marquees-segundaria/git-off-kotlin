@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_atualizar"
+        android:title="Receber Atualizacao"
+        android:icon="@mipmap/ic_refresh"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_limpar_pasta"
+        android:title="Limpar Pasta"
+        android:icon="@mipmap/ic_delete_folder"
+        app:showAsAction="never" />
+
+</menu>

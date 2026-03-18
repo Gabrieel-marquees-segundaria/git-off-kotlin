@@ -23,7 +23,7 @@ import com.g4br3.sitedentrodeapp.GitOperations
 import com.g4br3.sitedentrodeapp.MainActivity
 import com.g4br3.sitedentrodeapp.R
 import com.g4br3.sitedentrodeapp.TokenManager
-
+import androidx.core.content.edit
 
 
 class Callbacks(val start: ()-> Unit,val finish: ()-> Unit)
@@ -130,7 +130,11 @@ class Clone(var activity: AppCompatActivity,var cloneStatus: Callbacks= Callback
             }
 
             val owner = parts[0]
+            prefs.edit { putString("owner_Name", owner) }
             val repo = parts[1]
+            // Salvar corretamente o nome do repositório (antes salvava owner duas vezes)
+            prefs.edit { putString("repo_Name", repo) }
+
 
             btnClonar.isEnabled = false
             tvCloneResult.text = "Clonando repositório..."

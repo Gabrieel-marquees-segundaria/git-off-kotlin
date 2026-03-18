@@ -18,10 +18,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.g4br3.sitedentrodeapp.menus.FileListMenu
 import com.g4br3.sitedentrodeapp.recicleView.Default
 import com.g4br3.sitedentrodeapp.recicleView.DirType
 import com.g4br3.sitedentrodeapp.recicleView.FileType
 import com.g4br3.sitedentrodeapp.recicleView.FilesAdapter
+import com.g4br3.sitedentrodeapp.recicleView.Folder
+import com.g4br3.sitedentrodeapp.recicleView.getIcon
+import kotlinx.coroutines.NonCancellable.children
 import org.bouncycastle.asn1.iana.IANAObjectIdentifiers.directory
 import org.eclipse.jgit.internal.storage.file.FileSnapshot.save
 // removed unused import
@@ -34,13 +38,14 @@ class FilesListActivity : AppCompatActivity() {
     var backSpaceItems: MutableList<MutableList<ItemFile>> = mutableListOf()
     lateinit var adapter: FilesAdapter
     lateinit var reposDir: File
+    lateinit var sharedPref: SharedPreferences
 
     @SuppressLint("WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Salvar String
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        sharedPref = getPreferences(Context.MODE_PRIVATE)
 //        with (sharedPref.edit()) {
 //            putString("chave_usuario", "texto_salvo")
 //            apply() // ou commit()
@@ -64,6 +69,9 @@ class FilesListActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<ImageButton>(R.id.btnBackPrass).setOnClickListener {
+            btnBackPress ({ }, false)
+        }
 
 
         val recyclerView = findViewById<RecyclerView>(R.id.rvArquivos)
@@ -152,38 +160,31 @@ class FilesListActivity : AppCompatActivity() {
 // No onCreate
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Faça sua ação aqui (ex: mostrar um diálogo)
-                // Se quiser fechar a activity: finish()
-                Log.d("FilesList", "back pressd ${backSpaceItems.size}")
-                if (backSpaceItems.size > 0) {
-                    val index = backSpaceItems.size - 1
-                    val valorAnterior = backSpaceItems[index]
-                    // remove the saved snapshot from the stack
-                    backSpaceItems.removeAt(index)
-                    val index1 = valorAnterior[0].FILE.parentFile
-                    if (index1 != null) {
-                        Log.d("FilesList", index1.absolutePath)
-                        salvarEstado(index1, sharedPref)
+                btnBackPress(
+                    {
+                        isEnabled = false // Desativa este callback
                     }
-                    // valorAnterior is a MutableList<ItemFile> (a snapshot) — pass it directly
-                    updateRecycleView(valorAnterior)
-
-                } else {
-                    // Ou simplesmente:
-
-                    isEnabled = false // Desativa este callback
-                    // Dispatch a back press to the OnBackPressedDispatcher so default behavior runs
-                    this@FilesListActivity.onBackPressedDispatcher.onBackPressed()
-                }
+                )
             }
         }
         this.onBackPressedDispatcher.addCallback(this, callback)
 
 
-
-        findViewById<ImageButton>(R.id.btnMenu).setOnClickListener {
-            // limpar repo para clonar outro, temp, se tiver mais fun transformar em menu
-
+//
+//        findViewById<ImageButton>(R.id.btnMenu).setOnClickListener {
+//            // limpar repo para clonar outro, temp, se tiver mais fun transformar em menu
+//
+//
+//            val deleted = reposDir.deleteRecursively()
+//            if (deleted) {
+//                println("Pasta deletada com sucesso.")
+//                val intent = Intent(this@FilesListActivity, MainActivity::class.java)
+//                startActivity(intent)
+//                finish()
+//            } else println("Falha ao deletar a pasta.")
+//
+//        }
+        FileListMenu(this, gitOperations,{
 
             val deleted = reposDir.deleteRecursively()
             if (deleted) {
@@ -192,8 +193,16 @@ class FilesListActivity : AppCompatActivity() {
                 startActivity(intent)
                 finish()
             } else println("Falha ao deletar a pasta.")
-
+        }){
+            val estado = pegarEstado(sharedPref) ?:  reposDir.absolutePath
+            val fileEstado = File(estado)
+            val childrens = fileEstado.listFiles()
+            if (childrens != null) {
+                NewRecycleViewFiles(childrens.asIterable())
+            }
         }
+
+
         pegarLista_D_Estados(sharedPref)
     }
 
@@ -210,7 +219,7 @@ class FilesListActivity : AppCompatActivity() {
                     item.length(),
                     createAt = item.lastModified(),
                     type = if (item.isDirectory) DirType() else FileType(),
-                    icon = Default(),
+                    icon = if (item.isDirectory) Folder() else getIcon(item.name),
                     FILE = item
                 )
             }
@@ -221,6 +230,35 @@ class FilesListActivity : AppCompatActivity() {
 
         }
         TODO("item nao corresponde ao esperado")
+    }
+
+
+
+    fun btnBackPress(isEnabledFun: () -> Unit, closeApp: Boolean = true) {
+        // Faça sua ação aqui (ex: mostrar um diálogo)
+        // Se quiser fechar a activity: finish()
+        Log.d("FilesList", "back pressd ${backSpaceItems.size}")
+        if (backSpaceItems.size > 0) {
+            val index = backSpaceItems.size - 1
+            val valorAnterior = backSpaceItems[index]
+            // remove the saved snapshot from the stack
+            backSpaceItems.removeAt(index)
+            val index1 = valorAnterior[0].FILE.parentFile
+            if (index1 != null) {
+                Log.d("FilesList", index1.absolutePath)
+                salvarEstado(index1, sharedPref)
+            }
+            // valorAnterior is a MutableList<ItemFile> (a snapshot) — pass it directly
+            updateRecycleView(valorAnterior)
+
+        } else {
+            // Ou simplesmente:
+            if (!closeApp) return
+
+            isEnabledFun.invoke()
+            // Dispatch a back press to the OnBackPressedDispatcher so default behavior runs
+            this@FilesListActivity.onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     /**
@@ -281,7 +319,7 @@ class FilesListActivity : AppCompatActivity() {
 
                 Log.d("FilesList", "$tempDir $cont")
                 var tempDirFILE = File(tempDir)
-                if (tempDirFILE.exists() && cont > 0  && cont < dirs.size -1)  {
+                if (tempDirFILE.exists() && cont > 0 && cont < dirs.size - 1) {
                     var itemsFiles = tempDirFILE.listFiles().map { addItemFile(it) }
                     backSpaceItems.add(itemsFiles as MutableList<ItemFile>)
                 }
