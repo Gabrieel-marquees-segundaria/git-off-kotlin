@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import androidx.core.content.ContextCompat
 import okhttp3.Call
 import okhttp3.Callback
@@ -15,8 +16,6 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
-import android.util.Log
-import java.io.File
 
 
 class RequestApk {
@@ -171,10 +170,7 @@ class RequestApk {
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
             .setAllowedOverMetered(true)
             .setAllowedOverRoaming(true)
-        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
-        if (file.exists()) {
-            file.delete()
-        }
+
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         return downloadManager.enqueue(request)
     }
@@ -188,6 +184,7 @@ class RequestApk {
         context: Context,
         onComplete: (downloadId: Long, localUri: Uri?) -> Unit
     ): BroadcastReceiver {
+        Log.d(TAG, "downloadApkReceiver started")
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 Log.d(TAG, "downloadApkReceiver onReceive, intent=$intent extras=${intent?.extras}")
@@ -213,19 +210,11 @@ class RequestApk {
                             val status = cursor.getInt(statusIdx)
                             Log.d(TAG, "download status=$status")
                             if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                                // Try multiple columns which may contain the local URI/path depending on OEM/Android version
-                                val possibleCols = listOf(DownloadManager.COLUMN_LOCAL_URI, "local_filename", DownloadManager.COLUMN_MEDIAPROVIDER_URI)
-                                for (col in possibleCols) {
-                                    val idx = try { cursor.getColumnIndex(col) } catch (_: Exception) { -1 }
-                                    if (idx >= 0) {
-                                        val uriString = cursor.getString(idx)
-                                        Log.d(TAG, "found column $col -> $uriString")
-                                        if (!uriString.isNullOrBlank()) {
-                                            try { localUri = Uri.parse(uriString) } catch (_: Exception) { localUri = null }
-                                            if (localUri != null) break
-                                        }
-                                    }
-                                }
+                                // Use getUriForDownloadedFile for better compatibility on modern Android
+                                localUri = dm.getUriForDownloadedFile(id)
+                                Log.d(TAG, "Download successful, localUri=$localUri")
+                            } else {
+                                Log.d(TAG, "Download failed with status=$status")
                             }
                         }
                     }
@@ -245,7 +234,7 @@ class RequestApk {
                 appCtx,
                 receiver,
                 filter,
-                ContextCompat.RECEIVER_NOT_EXPORTED
+                ContextCompat.RECEIVER_EXPORTED
             )
             Log.d(TAG, "downloadApkReceiver registered on application context")
         } catch (e: Exception) {
@@ -255,7 +244,7 @@ class RequestApk {
                     context,
                     receiver,
                     filter,
-                    ContextCompat.RECEIVER_NOT_EXPORTED
+                    ContextCompat.RECEIVER_EXPORTED
                 )
                 Log.d(TAG, "downloadApkReceiver registered on provided context")
             } catch (ex: Exception) {

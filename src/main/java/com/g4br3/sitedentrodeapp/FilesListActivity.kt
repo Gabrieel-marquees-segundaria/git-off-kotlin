@@ -36,6 +36,7 @@ import com.g4br3.sitedentrodeapp.recicleView.FilesAdapter
 import com.g4br3.sitedentrodeapp.recicleView.Folder
 import com.g4br3.sitedentrodeapp.recicleView.HistotyAdapter
 import com.g4br3.sitedentrodeapp.recicleView.getIcon
+import com.g4br3.sitedentrodeapp.update.DownloadePath
 import com.g4br3.sitedentrodeapp.utils.ApkInstall
 import com.g4br3.sitedentrodeapp.utils.RequestApk
 import java.io.File
@@ -73,7 +74,7 @@ private var oldList: MutableList<Any> = mutableListOf<Any>()
 
         // Usar o layout da lista de arquivos
         setContentView(R.layout.activity_files_list)
-
+        DownloadePath.listFiles()
 
         sharedPref = getPreferences(MODE_PRIVATE)
         history = History(this)
@@ -498,12 +499,12 @@ openFile(it)
     fun getCurrentVersion() {
         val state = sharedPref.getString("datetimeupdate", "").toString()
 
-        if (state == getData()) return
+       if (state == getData()) return
         sharedPref.edit().putString("datetimeupdate", getData()).apply()
-        val requestApk = RequestApk()
+
         val currentVersionName = "Apk-version-5"
         var currentVersion = sharedPref.getString(currentVersionName, "1.0").toString()
-        Log.d("FilesList", "currentVercion: " + currentVersion.toString())
+        Log.d("Download", "currentVercion: " + currentVersion.toString())
 
         RequestApk.getLatestReleaseApkUrl(currentVersion = currentVersion) { hasUpdate, latest, apkUrl, error ->
             runOnUiThread {
@@ -534,8 +535,9 @@ openFile(it)
                 // Register receiver on application context and store it
                 downloadReceiver =
                     RequestApk.downloadApkReceiver(this) { id: Long, localUri: Uri? ->
-                        runOnUiThread {
-                            Log.d("FilesList", "Download complete id=$id localUri=$localUri")
+
+                            runOnUiThread {
+                            Log.d("Download", "Download complete id=$id localUri=$localUri")
                             if (id == currentDownloadId) {
                                 if (localUri != null) {
                                     ApkInstall().installAPK(this, localUri)
@@ -551,11 +553,11 @@ openFile(it)
                     }
 
                 // Inicia download e guarda o id
-                if (latest != currentVersion) {
+               if (latest != currentVersion) {
                     currentDownloadId = RequestApk.downloadApk(this, apkUrl, "gitOffAppKotlin.apk")
-                    Log.d("FilesList", "Started download with id=$currentDownloadId")
+                    Log.d("Download", "Started download with id=$currentDownloadId")
                     sharedPref.edit().putString(currentVersionName, latest).apply()
-                }
+               }
             }
         }
 
