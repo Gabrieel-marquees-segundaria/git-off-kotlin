@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
+    id("com.chaquo.python") version "17.0.0"
+
 }
 
 android {
@@ -17,9 +19,17 @@ android {
         versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-
+        ndk {
+            // On Apple silicon, you can omit x86_64.
+            abiFilters += listOf("armeabi-v7a")
+        }
+//        flavorDimensions += "pyVersion"
+//        productFlavors {
+//            create("py310") { dimension = "pyVersion" }
+//            create("py311") { dimension = "pyVersion" }
+//        }
     }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -50,11 +60,20 @@ android {
     }
 }
 
+//chaquopy {
+//    productFlavors {
+//        getByName("py310") { version = "3.10" }
+//        getByName("py311") { version = "3.11" }
+//    }
+//}
+
 dependencies {
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation(libs.firebase.crashlytics.buildtools)
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")

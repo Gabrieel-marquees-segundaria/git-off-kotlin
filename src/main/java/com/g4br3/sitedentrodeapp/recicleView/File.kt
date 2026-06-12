@@ -2,10 +2,11 @@ package com.g4br3.sitedentrodeapp.recicleView
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import java.io.File as FileIO
+import com.g4br3.sitedentrodeapp.popup.formatSize
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.io.File as FileIO
 
 data class File(
     val name: String,
@@ -17,7 +18,7 @@ data class File(
     var FILE: FileIO
     ){
  fun getSize(): String {
-     return "${size/ 1024} KB"
+     return formatSize(size)
  }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -31,16 +32,16 @@ data class File(
     }
 }
 
-open class PathType(open val value: String){
+open class PathType(open val value: String,open val  number: Int =0){
    fun isType(type: PathType): Boolean {
        return value == type.value
    }
 }
 
- class FileType(): PathType("FILE")
+ class FileType(): PathType("FILE", 1)
 
 
-class DirType(): PathType("DIR")
+class DirType(): PathType("DIR", 0)
 
 
 

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.g4br3.sitedentrodeapp.R
 
 
-class FilesAdapter(private val Files: MutableList<File>, val onClickItem: (fileData: File)->Unit): RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
+class FilesAdapter(private val Files: MutableList<File>, val onClickItem: (fileData: File)->Unit, val onLongClick: (fileData: File)->Unit): RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
 
     class FilesViewHolder(val view: View): RecyclerView.ViewHolder(view) {
         val icon = view.findViewById<ImageView>(R.id.ivFileIcon)
@@ -36,12 +36,17 @@ class FilesAdapter(private val Files: MutableList<File>, val onClickItem: (fileD
     override fun onBindViewHolder(holder: FilesAdapter.FilesViewHolder, position: Int) {
         // Antes: estava alterando o id da View, o que não muda a imagem exibida.
         // Deve-se alterar o recurso exibido pela ImageView.
-        holder.icon.setImageResource(Files[position].icon.value)
+        val icon = Files[position].icon
+        holder.icon.setImageResource(icon.value)
         holder.name.text = Files[position].name
         holder.size.text = Files[position].getSize()
         holder.data.text = Files[position].getTime()
         holder.view.setOnClickListener {
             onClickItem( Files[position])
+        }
+        holder.view.setOnLongClickListener {
+            onLongClick(Files[position])
+            return@setOnLongClickListener true
         }
 
     }

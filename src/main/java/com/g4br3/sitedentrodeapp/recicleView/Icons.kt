@@ -2,10 +2,20 @@ package com.g4br3.sitedentrodeapp.recicleView
 
 import com.g4br3.sitedentrodeapp.R
 
-open class Icon(var value: Int)
+open class Icon(var value: Int){
+    public open fun getHeight(): Int {
+        return 54
+    }
+
+    public open fun getWidth(): Int {
+        return 44
+    }
+}
 
 class Default(
-): Icon(R.mipmap.ic_document)
+): Icon(R.mipmap.ic_document){
+
+}
 
 
 class Audio(
@@ -17,7 +27,14 @@ class Image(
 
 
 class Folder(
-): Icon(R.mipmap.ic_folder_empty)
+): Icon(R.mipmap.ic_folder_empty){
+    override fun getHeight(): Int {
+        return 56
+    }
+    override fun getWidth(): Int {
+        return 46
+    }
+}
 
 
 class Video(

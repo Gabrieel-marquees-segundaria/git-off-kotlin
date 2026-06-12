@@ -19,11 +19,9 @@ import android.webkit.WebViewClient
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
-import com.g4br3.sitedentrodeapp.components.FileName
+import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.codec.binary.Base64
 import java.io.File
 
 class FileActivity : AppCompatActivity() {
@@ -57,6 +55,17 @@ class FileActivity : AppCompatActivity() {
         }
     }
 
+    fun obterImagemComoBase64(caminhoArquivo: String): String {
+        val arquivo = File(caminhoArquivo)
+        if (!arquivo.exists()) return ""
+
+        // Lê os bytes da imagem do armazenamento interno
+        val bytes = arquivo.readBytes()
+
+        // Transforma os bytes em uma String de texto Base64
+        return Base64.encodeBase64String(bytes)
+    }
+
     lateinit var webView: WebView
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -79,30 +88,30 @@ class FileActivity : AppCompatActivity() {
             }
         }
 
-                // This callback will only be called when the activity is at least in the STARTED state.
-                val callback = object : OnBackPressedCallback(true /* enabled by default */) {
-                    override fun handleOnBackPressed() {
-                        if (webView.canGoBack()) {
-                            webView.goBack()
-                        } else {
-                            //super.onBackPressed()
+        // This callback will only be called when the activity is at least in the STARTED state.
+        val callback = object : OnBackPressedCallback(true /* enabled by default */) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    //super.onBackPressed()
 
-                            val intent = Intent(this@FileActivity, FilesListActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }
-                    }
+                    val intent = Intent(this@FileActivity, FilesListActivity::class.java)
+                    startActivity(intent)
+                    finish()
                 }
+            }
+        }
 
-                onBackPressedDispatcher.addCallback(this, callback)
-
+        onBackPressedDispatcher.addCallback(this, callback)
 
 
         // Definir título da tela (pode vir via Intent)
         val titulo = intent.getStringExtra("titulo") ?: "Nome da Tela"
-        var url = intent.getStringExtra("url") ?: "file:///android_asset/view.html"
+        var url = intent.getStringExtra("url") ?: "file:///android_asset/index.html"
         var file = intent.getStringExtra("file")
-        var fileName ="hello"
+        var http: String = intent.getStringExtra("http").toString()
+        var fileName = "hello"
         if (file is String) {
             fileName = file.split("/")[file.split("/").size - 1]
         }
@@ -113,6 +122,68 @@ class FileActivity : AppCompatActivity() {
             .replace("'", "\\'")
             .replace("\n", "\\n")
             .replace("\r", "")
+
+        if (file is String) {
+            if (file.endsWith(".jpg") or file.endsWith(".png") or file.endsWith(".svg") or file.endsWith(
+                    ".webp"
+                )
+            ) {
+                val imagemTexto = obterImagemComoBase64(file)
+                conteudoScapado =
+                    """<img src="data:image/jpeg;base64,$imagemTexto" />"""//"<img src='file://$file'/>"
+            } else if (file.endsWith(".html")) {
+                val btnView = findViewById<ImageButton>(R.id.btnView)
+                btnView.visibility = View.VISIBLE
+                var viewActived = false
+                btnView.setOnClickListener {
+                    viewActived = !viewActived
+                    if (viewActived == true) {
+
+                        webView.post {
+                            currentSite(http) {
+                                try {
+                                    // 1. Abre e lê todo o conteúdo do arquivo eruda.js da pasta assets
+                                    val inputStream = assets.open("eruda.js")
+                                    val erudaCode =
+                                        inputStream.bufferedReader().use { it.readText() }
+
+                                    // 2. Cria o script de inicialização do Eruda
+                                    val initCode = """
+        (function() {
+            // Executa o código do Eruda lido do asset
+            $erudaCode
+            
+            // Inicializa o console na tela
+            eruda.init();
+        })();
+    """.trimIndent()
+
+                                    // 3. Injeta tudo direto no WebView
+                                    webView.evaluateJavascript(initCode, null)
+
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+
+                            }
+
+
+//                            webView.evaluateJavascript("window.mostrarConteudoHtml('${conteudoScapado
+//                                }', '$fileName')", null)
+                        }
+
+                    } else {
+                        webView.post {
+                            loadDefaultUrl(url, conteudoScapado, fileName)
+//                            webView.evaluateJavascript("window.mostrarConteudo('$conteudoScapado', '$fileName')", null)
+                        }
+                    }
+                }
+
+            }
+        }
+
+
         Log.d("WebView", "file conteudo: $conteudoScapado")
         val tvTituloTela = findViewById<TextView>(R.id.tvTituloTela)
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
@@ -128,6 +199,10 @@ class FileActivity : AppCompatActivity() {
                 onBackPressed()
             }
         }
+        btnVoltar.setOnLongClickListener {
+            startFileListActivity()
+            return@setOnLongClickListener true
+        }
 
         // Configurar WebView
         webView.settings.apply {
@@ -141,6 +216,16 @@ class FileActivity : AppCompatActivity() {
             // Aumenta a fonte para 150% do tamanho original
             textZoom = 200
 
+
+            allowContentAccess = true
+
+
+            // Permite o acesso geral a arquivos do sistema
+            allowFileAccess = true
+
+// Permite que arquivos locais carreguem outros arquivos locais (essencial para a tag <img>)
+            allowFileAccessFromFileURLs = true
+            allowUniversalAccessFromFileURLs = true
 // Opcional: Melhora o suporte para visualização em desktop
             useWideViewPort = true
             loadWithOverviewMode = true
@@ -188,27 +273,48 @@ class FileActivity : AppCompatActivity() {
         // webView.loadUrl(url)
 
 
-        currentSite(
-            url, {
-             //   webView.evaluateJavascript("mostrarConteudo('$conteudoScapado', 'hello')", null)
-
-                webView.webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView, url: String) {
-                        webView.evaluateJavascript("window.mostrarConteudo('$conteudoScapado', '$fileName')", null)
-                    }
-                }
-            }
-        )
+        loadDefaultUrl(url, conteudoScapado, fileName)
         class JsBridge {
             @JavascriptInterface
             fun onJsReady() {
                 runOnUiThread {
-                    webView.evaluateJavascript("window.mostrarConteudo('$conteudoScapado', '$titulo')", null)
+                    webView.evaluateJavascript(
+                        "window.mostrarConteudo('$conteudoScapado', '$titulo')",
+                        null
+                    )
                 }
             }
         }
 
         webView.addJavascriptInterface(JsBridge(), "Android")
+    }
+
+    fun loadDefaultUrl(
+        url: String,
+        conteudoScapado: String,
+        fileName: String,
+        onLoaded: (() -> Unit)? = null
+    ) {
+        currentSite(
+            url, {
+                //   webView.evaluateJavascript("mostrarConteudo('$conteudoScapado', 'hello')", null)
+
+                webView.webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView, url: String) {
+                        webView.evaluateJavascript(
+                            "window.mostrarConteudo('$conteudoScapado', '$fileName')",
+                            null
+                        )
+                        onLoaded?.invoke()
+                    }
+                }
+            }
+        )
+    }
+    fun startFileListActivity(){
+        val intent = Intent(this@FileActivity, FilesListActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
@@ -220,9 +326,7 @@ class FileActivity : AppCompatActivity() {
         } else {
             //super.onBackPressed()
 
-            val intent = Intent(this@FileActivity, FilesListActivity::class.java)
-            startActivity(intent)
-            finish()
+startFileListActivity()
         }
     }
 

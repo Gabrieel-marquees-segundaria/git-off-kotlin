@@ -1,18 +1,15 @@
 package com.g4br3.sitedentrodeapp
 
 import android.annotation.SuppressLint
-import android.content.Context.MODE_PRIVATE
-
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
-
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
-
 import androidx.appcompat.app.AppCompatActivity
 import com.g4br3.sitedentrodeapp.activitys.Callbacks
-
 import com.g4br3.sitedentrodeapp.activitys.Clone
 
 
@@ -21,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var clone: Clone
     private lateinit var dialog: LoadingDialog
 
+    lateinit var sharedPref: SharedPreferences
 
     @SuppressLint("WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         clone = Clone(this, cloneCallbacks)
             .setup(savedInstanceState)
 
-
+        sharedPref = getPreferences(Context.MODE_PRIVATE)
 
         // Segurança: listFiles() pode retornar null, então protegemos contra NPE
         val reposDir = clone.gitOperations.reposDir

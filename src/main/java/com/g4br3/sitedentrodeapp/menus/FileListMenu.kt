@@ -11,6 +11,7 @@ import com.g4br3.sitedentrodeapp.FilesListActivity
 import com.g4br3.sitedentrodeapp.GitOperations
 import com.g4br3.sitedentrodeapp.R
 import com.g4br3.sitedentrodeapp.TokenManager
+import com.g4br3.sitedentrodeapp.popup.Default
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,7 +56,13 @@ class FileListMenu(
             popup.show()
         }
     }
-
+    private fun showAlertDialog(dimissCallback: ()->Unit) {
+        Default.showAlertDialog(activity,
+            "remover repositorio",
+            " voce realmente quer apagar todos os arquivos, voce vai perder o acesso aos arquivos",
+        dimissCallback
+        )
+    }
     // Funções de exemplo para cada ação
     private fun receberDados() {
         // TODO: implemente a lógica de recebimento
@@ -108,8 +115,11 @@ class FileListMenu(
     }
 
     private fun limparPasta() {
-        limparPastaCallback.invoke()
-        // TODO: implemente a lógica de limpeza da pasta
-        Toast.makeText(activity, "Pasta limpa!", Toast.LENGTH_SHORT).show()
+        showAlertDialog {
+            limparPastaCallback.invoke()
+            // TODO: implemente a lógica de limpeza da pasta
+            Toast.makeText(activity, "Pasta limpa!", Toast.LENGTH_SHORT).show()
+        }
+
     }
 }
